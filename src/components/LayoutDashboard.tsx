@@ -17,19 +17,19 @@ interface LayoutDashboardProps {
 export default function LayoutDashboard({ children }: LayoutDashboardProps) {
 	const { isDesktop, isMobile } = useWindowResize();
 	const { state, toggle } = useToggle(false);
-	const { user, isLoading } = useAuth();
+	// const { user, isLoading } = useAuth();
 
-	if (isLoading) {
-		return (
-			<div className="h-screen w-full justify-center items-center flex flex-col bg-primary zoom-in-out ">
-				<img
-					src="/logo.png"
-					alt="Logo"
-					className="w-full h-20 object-contain"
-				/>
-			</div>
-		);
-	}
+	// if (isLoading) {
+	// 	return (
+	// 		<div className="h-screen w-full justify-center items-center flex flex-col bg-primary zoom-in-out ">
+	// 			<img
+	// 				src="/logo.png"
+	// 				alt="Logo"
+	// 				className="w-full h-20 object-contain"
+	// 			/>
+	// 		</div>
+	// 	);
+	// }
 
 	return (
 		<div className="w-full">
@@ -47,7 +47,7 @@ export default function LayoutDashboard({ children }: LayoutDashboardProps) {
 					/>
 				</div>
 				<div>
-					{!isLoading && user && isDesktop && (
+					{/* {!isLoading && user && isDesktop && (
 						<User
 							className="text-white"
 							avatarProps={{
@@ -59,8 +59,8 @@ export default function LayoutDashboard({ children }: LayoutDashboardProps) {
 									{user.email}
 								</span>
 							}
-						/>
-					)}
+						/> */}
+					{/* )} */}
 				</div>
 			</div>
 			{/* {isDesktop && (
@@ -97,7 +97,7 @@ export default function LayoutDashboard({ children }: LayoutDashboardProps) {
 							className="text-2xl text-primary cursor-pointer"
 						/>
 					</div>
-					<div className="px-4 pt-8">
+					{/* <div className="px-4 pt-8">
 						{!isLoading && user && isMobile && (
 							<User
 								className="text-black text-xs"
@@ -112,7 +112,7 @@ export default function LayoutDashboard({ children }: LayoutDashboardProps) {
 								}
 							/>
 						)}
-					</div>
+					</div> */}
 
 					<DrawerContent />
 				</Drawer>

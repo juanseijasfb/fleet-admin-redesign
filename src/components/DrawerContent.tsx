@@ -4,7 +4,7 @@ import { BsTruck, BsHouseDoor, BsBuilding, BsPeople } from "react-icons/bs";
 import classNames from "classnames";
 import { CiLogout } from "react-icons/ci";
 export default function DrawerContent() {
-	const path = window.location.pathname;
+	const path = typeof window !== "undefined" ? window.location.pathname : ""
 	const links = [
 		{
 			name: "Home",
