@@ -135,4 +135,56 @@ export default class ApiService {
 		);
 		return response;
 	}
+
+  async addDispatch(addDispatcherBody: {
+    firstName: string;
+    lastName: string;
+    dispatcherEmail: string;
+    role: string;
+    enabled: string;
+  }) {
+    const params = new URLSearchParams();
+    params.append("firstName", addDispatcherBody.firstName);
+    params.append("lastName", addDispatcherBody.lastName);
+    params.append("dispatcherEmail", addDispatcherBody.dispatcherEmail);
+    params.append("role", addDispatcherBody.role);
+    params.append("enabled", addDispatcherBody.enabled);
+    const response = await this.request(
+      `/addDispatcher?${params.toString()}`,
+      "POST",
+      {
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+      }
+    );
+  }
+
+  async addDispatchFake(addDispatcherBody: {
+    firstName: string;
+    lastName: string;
+    dispatcherEmail: string;
+    role: string;
+    enabled: boolean;
+  }) {
+    const params = new URLSearchParams();
+    params.append("firstName", addDispatcherBody.firstName);
+    params.append("lastName", addDispatcherBody.lastName);
+    params.append("dispatcherEmail", addDispatcherBody.dispatcherEmail);
+    params.append("role", addDispatcherBody.role);
+    params.append("enabled", addDispatcherBody.enabled.toString());
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      const response = {
+        mensaje: "Dispatche creado exitosamente",
+        datos: addDispatcherBody,
+      };
+      console.log(response);
+
+      return response;
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  }
 }
