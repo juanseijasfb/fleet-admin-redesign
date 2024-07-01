@@ -20,15 +20,8 @@ export default function index() {
 				}}
 			/>
 			<div className="px-10">
-        {<CarrierTable rows={carriers ?? []} />}
-      </div>
-			<Button
-				onClick={() => {
-					window.location.href = "/api/auth/login";
-				}}
-			>
-				Login
-			</Button>
+        		{<CarrierTable rows={carriers ?? []} />}
+      		</div>
 			<ModalForm isOpen={modal.isOpen} onOpenChange={modal.onOpenChange}>
 				<div>
 					<h1>Modal</h1>
