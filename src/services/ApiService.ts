@@ -187,4 +187,26 @@ export default class ApiService {
       console.error("Error:", error);
     }
   }
+
+  async addCarrier(addCarrierBody: {
+    mc: string;
+    carrierName: string;
+  }) {
+    const params = new URLSearchParams();
+    params.append("mc", addCarrierBody.mc);
+    params.append("carrierName", addCarrierBody.carrierName);
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      const response = {
+        mensaje: "Carrier creado exitosamente",
+        datos: addCarrierBody,
+      };
+      console.log(response);
+
+      return response;
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  } 
 }

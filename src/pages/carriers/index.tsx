@@ -1,11 +1,16 @@
 import HeaderDashboard from "@/components/HeaderDashboard";
 import LayoutDashboard from "@/components/LayoutDashboard";
 import ModalForm from "@/components/ModalForm";
+import AddCarrierForm from "@/components/forms/AddCarrierForm";
+import useCreateCarrier from "@/hooks/api/useCreateCarrier";
 import { Button, useDisclosure } from "@nextui-org/react";
 import React from "react";
 
 export default function index() {
 	const modal = useDisclosure();
+	const { createCarrier, isPending } = useCreateCarrier(() => {
+		modal.onClose();
+	})
 	return (
 		<LayoutDashboard>
 			<HeaderDashboard
@@ -13,7 +18,7 @@ export default function index() {
 				addButtonText="Create Carrier"
 				placeholderSearch="Search Carrier"
 				addButtonAction={() => {
-					alert("Create Carrier");
+					modal.onOpen();
 				}}
 			/>
 			<Button
@@ -24,9 +29,7 @@ export default function index() {
 				Login
 			</Button>
 			<ModalForm isOpen={modal.isOpen} onOpenChange={modal.onOpenChange}>
-				<div>
-					<h1>Modal</h1>
-				</div>
+				<AddCarrierForm isLoading={isPending} onSubmit={(values) => createCarrier(values)}/>
 			</ModalForm>
 		</LayoutDashboard>
 	);
