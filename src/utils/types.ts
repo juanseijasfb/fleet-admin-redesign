@@ -57,3 +57,22 @@ export type Carrier = {
 	mcNumber: number;
 	carrier: string;
 };
+
+export type DriverAssignedResponseAPI = {
+	dispacherId: string,
+    driverId: number,
+    FirstName: string,
+    LastName: string,
+    Equipment: string,
+    Carrier: string,
+    MCNumber: number,
+    maxWeight: number,
+    email: string,
+    enabled: number,
+    fullName: string
+}
+
+export type DriverUnassignedResponseAPI = {
+	driverId: number;
+	fullName: string;
+}

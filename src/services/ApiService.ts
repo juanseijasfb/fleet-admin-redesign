@@ -4,6 +4,8 @@ import {
 	CarrierResponseAPI,
 	DispatcherResponseAPI,
 	Driver,
+	DriverAssignedResponseAPI,
+	DriverUnassignedResponseAPI,
 	DriverResponseAPI,
 	DriverStatus,
 } from "@/utils/types";
@@ -209,4 +211,32 @@ export default class ApiService {
       console.error("Error:", error);
     }
   } 
+
+  async getAssignedDriver({ search }: { search?: string }) {
+    const params = new URLSearchParams();
+    if (search) {
+      params.append("dispacher", search);
+    }
+
+    const driverAssigned = await this.request<DriverAssignedResponseAPI[]>(
+      `/getMyDriversList?${params.toString()}`,
+      "GET"
+    );
+
+    return driverAssigned;
+  }
+
+  async getUnassignedDriver({ search }: { search?: string }) {
+    const params = new URLSearchParams();
+    if (search) {
+      params.append("dispatcher", search);
+    }
+
+    const driverAssigned = await this.request<DriverUnassignedResponseAPI[]>(
+      `/getUnassignedDriversList?${params.toString()}`,
+      "GET"
+    );
+
+    return driverAssigned;
+  }
 }

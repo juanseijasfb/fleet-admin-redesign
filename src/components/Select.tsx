@@ -11,11 +11,13 @@ export interface SelectProps {
 	errorMessage?: string;
 	// biome-ignore lint/suspicious/noExplicitAny: <explanation>
 	register?: any;
-	value?: string | number;
+	value?: string | number | string[];
 	isLoading?: boolean;
 	textAlign?: "center" | "left";
 	onChange?: (e: React.ChangeEvent<HTMLSelectElement>) => void;
 	placeholder: string;
+	selectionMode?:string;
+	onSelectionChange?:any;
 }
 export default function Select({
 	className,
@@ -31,6 +33,8 @@ export default function Select({
 	name,
 	value,
 	label,
+	selectionMode,
+	onSelectionChange
 }: SelectProps) {
 	return (
 		<div>
@@ -44,12 +48,14 @@ export default function Select({
 				classNames={{
 					value: `text-${textAlign}`,
 				}}
-				selectedKeys={value ? [value] : undefined}
+				selectedKeys={onSelectionChange && value ? value : undefined || value ? [value] : undefined}
+				selectionMode={selectionMode ? "multiple" : "single"}
 				className={className}
 				onChange={onChange}
 				errorMessage={!isValid && errorMessage}
 				isInvalid={!isValid}
 				placeholder={placeholder}
+				onSelectionChange={onSelectionChange}
 				{...register}
 			>
 				{options.map((option) => (
