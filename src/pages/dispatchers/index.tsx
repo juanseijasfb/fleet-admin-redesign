@@ -27,12 +27,8 @@ export default function index() {
     setDispatchName(dispatcher[0].firstName + " " + dispatcher[0].lastName);
     setSelectedDriverEmail(dispatcher[0].email);
     modalAssDriver.onOpen();
-  }
+  };
 
-  const getDriverId = (arr:DriverUnassignedResponseAPI[]) => {
-    return arr.map((driver) => driver.driverId.toString());
-  }
-  
   const handleAssignedDriverSubmit = (values: string[]) => {
     console.log(values);
     modalAssDriver.onClose();
@@ -69,13 +65,14 @@ export default function index() {
           </div>
         ) : (
           <AssignedDriver
+            onClose={modalAssDriver.onClose}
             onSubmit={(values) => {
               handleAssignedDriverSubmit(values);
             }}
             isLoading={isLoadingAssigned && isLoadingUnassigned}
             dispatcherName={dispatchName}
-            driverAssigned={getDriverId(assignedDriver ?? [])}
-            driverUnassigned={getDriverId(unassignedDriver ?? [])}
+            driverAssigned={assignedDriver ?? []}
+            driverUnassigned={unassignedDriver ?? []}
           />
         )}
       </ModalForm>

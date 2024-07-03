@@ -1,33 +1,35 @@
 import React, { useState } from "react";
 import { Button } from "@nextui-org/react";
-import Select from "../Select";
+import { DriverAssignedResponseAPI, DriverUnassignedResponseAPI } from "@/utils/types";
+import Select from "react-select";
 
-interface Option {
-  label: string;
-  value: string;
-}
 interface AssignedDriverProps {
   onSubmit: (values: string[]) => void;
+  onClose: () => void;
   isLoading?: boolean;
   dispatcherName: string;
-  driverAssigned: string[];
-  driverUnassigned: string[];
+  driverAssigned: DriverAssignedResponseAPI[];
+  driverUnassigned: DriverUnassignedResponseAPI[];
 }
 
-const getOptions = (data: string[]): Option[] => {
-  return data.map((item) => ({ label: "Driver " + item, value: item }));
-};
+const getFormattedDrivers = (data: any[]) =>
+  data.map((driver) => ({
+    label: driver.fullName.replace(/,/g, " "),
+    value: driver.driverId.toString(),
+}));
 
 export default function AssignedDriver({
   onSubmit,
+  onClose,
   isLoading,
   dispatcherName,
   driverAssigned,
   driverUnassigned,
 }: AssignedDriverProps) {
-  const [idAssigned, setIdAssigned] = useState(driverAssigned);
+  const [selectedIds, setSelectedIds] = useState<string[]>();
+
   const totalDrivers = [...driverAssigned, ...driverUnassigned];
-  const totalDriversList = getOptions(totalDrivers);
+  const totalDriversList = getFormattedDrivers(totalDrivers);
 
   return (
     <div className="flex flex-col gap-8 py-4">
@@ -35,22 +37,16 @@ export default function AssignedDriver({
         Driver Assigned to {dispatcherName}
       </h3>
       <Select
-        size="lg"
-        selectionMode="multiple"
-        value={idAssigned}
+        defaultValue={getFormattedDrivers(driverAssigned)}
+        isMulti
         options={totalDriversList}
-        onSelectionChange={setIdAssigned}
-        placeholder="Drivers"
+        onChange={(e: any) => setSelectedIds(e)}
       />
       <div className="flex justify-end gap-4">
-        <Button isLoading={isLoading} color="danger" variant="light">
+        <Button isLoading={isLoading} onClick={() => onClose()} color="danger" variant="light">
           Cancel
         </Button>
-        <Button
-          isLoading={isLoading}
-          onClick={() => onSubmit(idAssigned)}
-          color="primary"
-        >
+        <Button isLoading={isLoading} onClick={() => onSubmit(selectedIds ?? [])} color="primary">
           Save
         </Button>
       </div>
