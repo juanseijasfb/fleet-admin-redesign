@@ -9,6 +9,15 @@ export const driverSchema = Yup.object().shape({
 	trailerType: Yup.string().required("Trailer Type is required"),
 	maxLoadWeight: Yup.number().required("Max Load Weight is required"),
 });
+export const driverUpdateSchema = Yup.object().shape({
+	firstName: Yup.string().required("First name is required"),
+	lastName: Yup.string().required("Last name is required"),
+	email: Yup.string().email("Invalid email").required("Email is required"),
+	mcNumber: Yup.number().required("MC Number is required"),
+	carrier: Yup.string().required("Carrier Name is required"),
+	equipment: Yup.string().required("Trailer Type is required"),
+	weight: Yup.number().required("Max Load Weight is required"),
+});
 export const dispatcherSchema = Yup.object().shape({
 	firstName: Yup.string().required("First name is required"),
 	lastName: Yup.string().required("Last name is required"),

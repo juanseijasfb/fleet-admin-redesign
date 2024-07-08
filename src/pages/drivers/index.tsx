@@ -2,20 +2,28 @@ import HeaderDashboard from "@/components/HeaderDashboard";
 import LayoutDashboard from "@/components/LayoutDashboard";
 import DriverTable from "@/components/driversTable";
 import useGetDrivers from "@/hooks/api/useGetDrivers";
-import React from "react";
+import React, { useState } from "react";
 import { Selection, useDisclosure } from "@nextui-org/react";
 import ModalForm from "@/components/ModalForm";
 import AddDriverForm from "@/components/forms/AddDriverForm";
 import useCreateDriver from "@/hooks/api/useCreateDriver";
+import UpdateDriverForm, { UpdateDriverValues } from "@/components/forms/UpdateDriverForm";
 
 export default function index() {
 	const { isLoading, isError, drivers } = useGetDrivers();
 	const [showButton, setShowButton] = React.useState(false);
+	const [ selectedDriver, setSelectedDriver] = useState<UpdateDriverValues[]>([]);
 	const [selectedKeys, setSelectedKeys] = React.useState<Selection>(new Set());
 	const modal = useDisclosure();
+	const modalUpdate = useDisclosure();
 	const { createDriver, isPending } = useCreateDriver(() => {
 		modal.onClose();
 	});
+
+	const handlerModalUpdate = (e: any) => {
+		setSelectedDriver(e)
+		modalUpdate.onOpen();
+	}
 
 	return (
 		<LayoutDashboard>
@@ -41,6 +49,7 @@ export default function index() {
 					rows={drivers ?? []}
 					selectedKeys={selectedKeys}
 					setSelectedKeys={setSelectedKeys}
+					onMultipleSelect={handlerModalUpdate}
 				/>
 			</div>
 			<ModalForm isOpen={modal.isOpen} onOpenChange={modal.onOpenChange}>
@@ -50,6 +59,15 @@ export default function index() {
 						createDriver(values);
 					}}
 				/>
+			</ModalForm>
+			<ModalForm isOpen={modalUpdate.isOpen} onOpenChange={modalUpdate.onOpenChange}>
+				<UpdateDriverForm 
+					defaultValues={selectedDriver}
+					isLoading={isPending}
+					onSubmit={(values) => {
+						console.log(values);
+						modalUpdate.onClose();
+					}}/>
 			</ModalForm>
 		</LayoutDashboard>
 	);

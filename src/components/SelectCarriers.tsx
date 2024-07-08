@@ -7,12 +7,14 @@ interface SelectCarriersProps {
 	value?: string;
 	isValid?: boolean;
 	errorMessage?: string;
+	defaultSelectedKeys?: string;
 }
 export default function SelectCarriers({
 	onChange,
 	value,
 	isValid,
 	errorMessage,
+	defaultSelectedKeys
 }: SelectCarriersProps) {
 	const { carriers, isLoading, isError } = useGetCarriers();
 	return (
@@ -26,6 +28,7 @@ export default function SelectCarriers({
 				}
 			}}
 			value={value}
+			defaultValue={defaultSelectedKeys}
 			options={
 				carriers?.map((carrier) => ({
 					label: `(${carrier.mcNumber}) ${carrier.carrier}`,

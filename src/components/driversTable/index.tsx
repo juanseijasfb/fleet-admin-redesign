@@ -32,7 +32,7 @@ const statusColorMap: Record<DriverStatus, "success" | "danger"> = {
 
 interface DriverTableProps {
 	rows: Driver[];
-	onMultipleSelect?: (selected: Driver[]) => void;
+	onMultipleSelect: (selected: Driver[]) => void;
 	selectedKeys: Selection;
 	setSelectedKeys: React.Dispatch<React.SetStateAction<Selection>>;
 }
@@ -41,6 +41,7 @@ export default function DriverTable({
 	rows,
 	selectedKeys,
 	setSelectedKeys,
+	onMultipleSelect
 }: DriverTableProps) {
 	const [page, setPage] = React.useState(1);
 	const rowsPerPage = 6;
@@ -90,7 +91,7 @@ export default function DriverTable({
 								</Button>
 							</DropdownTrigger>
 							<DropdownMenu>
-								<DropdownItem>Edit</DropdownItem>
+								<DropdownItem onClick={() => onMultipleSelect([driver])}>Edit</DropdownItem>
 								<DropdownItem>Delete</DropdownItem>
 							</DropdownMenu>
 						</Dropdown>

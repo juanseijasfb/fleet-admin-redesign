@@ -208,5 +208,34 @@ export default class ApiService {
     } catch (error) {
       console.error("Error:", error);
     }
-  } 
+  }
+
+  async updateDriver(updateDriverBody: {
+	firstName: string;
+	lastName: string;
+	email: string;
+	mcNumber: string;
+	carrier: string;
+	maxWeight: string;
+	equipment: string;
+  }) {
+	const params = new URLSearchParams();
+	params.append("firstName", updateDriverBody.firstName);
+	params.append("lastName", updateDriverBody.lastName);
+	params.append("email", updateDriverBody.email);
+	params.append("mcNumber", updateDriverBody.mcNumber);
+	params.append("carrier", updateDriverBody.carrier);
+	params.append("weight", updateDriverBody.maxWeight);
+	params.append("equipment", updateDriverBody.equipment);
+	try {
+	  await new Promise((resolve) => setTimeout(resolve, 1000));
+	  const response = {
+		mensaje: "Driver actualizado exitosamente",
+	  }
+	  console.log(response);
+	  return response;
+	} catch (error) {
+	  console.error("Error:", error);
+	}
+  }
 }

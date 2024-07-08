@@ -16,6 +16,7 @@ export interface SelectProps {
 	textAlign?: "center" | "left";
 	onChange?: (e: React.ChangeEvent<HTMLSelectElement>) => void;
 	placeholder: string;
+	defaultValue?: string | number;
 }
 export default function Select({
 	className,
@@ -31,6 +32,7 @@ export default function Select({
 	name,
 	value,
 	label,
+	defaultValue
 }: SelectProps) {
 	return (
 		<div>
@@ -45,6 +47,7 @@ export default function Select({
 					value: `text-${textAlign}`,
 				}}
 				selectedKeys={value ? [value] : undefined}
+				defaultSelectedKeys={defaultValue}
 				className={className}
 				onChange={onChange}
 				errorMessage={!isValid && errorMessage}
