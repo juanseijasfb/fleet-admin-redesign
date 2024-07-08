@@ -19,3 +19,8 @@ export const carrierSchema = Yup.object().shape({
 	mc: Yup.string().required("MC is required"),
 	carrierName: Yup.string().required("Carrier Name is required")
 })
+export const restrictionDriveSchema = Yup.object().shape({
+	driver: Yup.string().required("Driver is required"),
+	city: Yup.string().required("City is required"),
+	state: Yup.string().required("State is required"),
+})
