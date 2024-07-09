@@ -1,12 +1,12 @@
 import { API_URL } from "@/utils/constants";
 import {
-	Carrier,
-	CarrierResponseAPI,
-	DispatcherResponseAPI,
-	Driver,
-	DriverAssignedResponseAPI,
-	DriverUnassignedResponseAPI,
-	DriverResponseAPI,
+	type Carrier,
+	type CarrierResponseAPI,
+	type DispatcherResponseAPI,
+	type Driver,
+	type DriverAssignedResponseAPI,
+	type DriverUnassignedResponseAPI,
+	type DriverResponseAPI,
 	DriverStatus,
 } from "@/utils/types";
 
@@ -138,105 +138,134 @@ export default class ApiService {
 		return response;
 	}
 
-  async addDispatch(addDispatcherBody: {
-    firstName: string;
-    lastName: string;
-    dispatcherEmail: string;
-    role: string;
-    enabled: string;
-  }) {
-    const params = new URLSearchParams();
-    params.append("firstName", addDispatcherBody.firstName);
-    params.append("lastName", addDispatcherBody.lastName);
-    params.append("dispatcherEmail", addDispatcherBody.dispatcherEmail);
-    params.append("role", addDispatcherBody.role);
-    params.append("enabled", addDispatcherBody.enabled);
-    const response = await this.request(
-      `/addDispatcher?${params.toString()}`,
-      "POST",
-      {
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-      }
-    );
-  }
+	async addDispatch(addDispatcherBody: {
+		firstName: string;
+		lastName: string;
+		dispatcherEmail: string;
+		role: string;
+		enabled: string;
+	}) {
+		const params = new URLSearchParams();
+		params.append("firstName", addDispatcherBody.firstName);
+		params.append("lastName", addDispatcherBody.lastName);
+		params.append("dispatcherEmail", addDispatcherBody.dispatcherEmail);
+		params.append("role", addDispatcherBody.role);
+		params.append("enabled", addDispatcherBody.enabled);
+		const response = await this.request(
+			`/addDispatcher?${params.toString()}`,
+			"POST",
+			{
+				headers: {
+					"Content-Type": "application/x-www-form-urlencoded",
+				},
+			},
+		);
+	}
 
-  async addDispatchFake(addDispatcherBody: {
-    firstName: string;
-    lastName: string;
-    dispatcherEmail: string;
-    role: string;
-    enabled: boolean;
-  }) {
-    const params = new URLSearchParams();
-    params.append("firstName", addDispatcherBody.firstName);
-    params.append("lastName", addDispatcherBody.lastName);
-    params.append("dispatcherEmail", addDispatcherBody.dispatcherEmail);
-    params.append("role", addDispatcherBody.role);
-    params.append("enabled", addDispatcherBody.enabled.toString());
-    try {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+	async addDispatchFake(addDispatcherBody: {
+		firstName: string;
+		lastName: string;
+		dispatcherEmail: string;
+		role: string;
+		enabled: boolean;
+	}) {
+		const params = new URLSearchParams();
+		params.append("firstName", addDispatcherBody.firstName);
+		params.append("lastName", addDispatcherBody.lastName);
+		params.append("dispatcherEmail", addDispatcherBody.dispatcherEmail);
+		params.append("role", addDispatcherBody.role);
+		params.append("enabled", addDispatcherBody.enabled.toString());
+		try {
+			await new Promise((resolve) => setTimeout(resolve, 1000));
 
-      const response = {
-        mensaje: "Dispatche creado exitosamente",
-        datos: addDispatcherBody,
-      };
-      console.log(response);
+			const response = {
+				mensaje: "Dispatche creado exitosamente",
+				datos: addDispatcherBody,
+			};
+			console.log(response);
 
-      return response;
-    } catch (error) {
-      console.error("Error:", error);
-    }
-  }
+			return response;
+		} catch (error) {
+			console.error("Error:", error);
+		}
+	}
 
-  async addCarrier(addCarrierBody: {
-    mc: string;
-    carrierName: string;
-  }) {
-    const params = new URLSearchParams();
-    params.append("mc", addCarrierBody.mc);
-    params.append("carrierName", addCarrierBody.carrierName);
-    try {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+	async addCarrier(addCarrierBody: {
+		mc: string;
+		carrierName: string;
+	}) {
+		const params = new URLSearchParams();
+		params.append("mc", addCarrierBody.mc);
+		params.append("carrierName", addCarrierBody.carrierName);
+		try {
+			await new Promise((resolve) => setTimeout(resolve, 1000));
 
-      const response = {
-        mensaje: "Carrier creado exitosamente",
-        datos: addCarrierBody,
-      };
-      console.log(response);
+			const response = {
+				mensaje: "Carrier creado exitosamente",
+				datos: addCarrierBody,
+			};
+			console.log(response);
 
-      return response;
-    } catch (error) {
-      console.error("Error:", error);
-    }
-  } 
+			return response;
+		} catch (error) {
+			console.error("Error:", error);
+		}
+	}
 
-  async getAssignedDriver({ search }: { search?: string }) {
-    const params = new URLSearchParams();
-    if (search) {
-      params.append("dispacher", search);
-    }
+	async getAssignedDriver({ search }: { search?: string }) {
+		const params = new URLSearchParams();
+		if (search) {
+			params.append("dispacher", search);
+		}
 
-    const driverAssigned = await this.request<DriverAssignedResponseAPI[]>(
-      `/getMyDriversList?${params.toString()}`,
-      "GET"
-    );
+		const driverAssigned = await this.request<DriverAssignedResponseAPI[]>(
+			`/getMyDriversList?${params.toString()}`,
+			"GET",
+		);
 
-    return driverAssigned;
-  }
+		return driverAssigned;
+	}
 
-  async getUnassignedDriver({ search }: { search?: string }) {
-    const params = new URLSearchParams();
-    if (search) {
-      params.append("dispatcher", search);
-    }
+	async getUnassignedDriver({ search }: { search?: string }) {
+		const params = new URLSearchParams();
+		if (search) {
+			params.append("dispatcher", search);
+		}
 
-    const driverAssigned = await this.request<DriverUnassignedResponseAPI[]>(
-      `/getUnassignedDriversList?${params.toString()}`,
-      "GET"
-    );
+		const driverAssigned = await this.request<DriverUnassignedResponseAPI[]>(
+			`/getUnassignedDriversList?${params.toString()}`,
+			"GET",
+		);
 
-    return driverAssigned;
-  }
+		return driverAssigned;
+	}
+
+	async updateDriver(updateDriverBody: {
+		firstName: string;
+		lastName: string;
+		email: string;
+		mcNumber: string;
+		carrier: string;
+		maxWeight: string;
+		equipment: string;
+	}) {
+		const params = new URLSearchParams();
+		params.append("firstName", updateDriverBody.firstName);
+		params.append("lastName", updateDriverBody.lastName);
+		params.append("email", updateDriverBody.email);
+		params.append("mcNumber", updateDriverBody.mcNumber);
+		params.append("carrier", updateDriverBody.carrier);
+		params.append("weight", updateDriverBody.maxWeight);
+		params.append("equipment", updateDriverBody.equipment);
+		try {
+			await new Promise((resolve) => setTimeout(resolve, 1000));
+			const response = {
+				mensaje: "Driver actualizado exitosamente",
+			};
+			console.log(response);
+			return response;
+		} catch (error) {
+			console.error("Error:", error);
+		}
+	}
 }

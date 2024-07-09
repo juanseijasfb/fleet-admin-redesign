@@ -1,5 +1,5 @@
 import { SelectItem, Select as S } from "@nextui-org/react";
-import React from "react";
+import type React from "react";
 
 export interface SelectProps {
 	size?: "sm" | "md" | "lg" | undefined;
@@ -16,8 +16,9 @@ export interface SelectProps {
 	textAlign?: "center" | "left";
 	onChange?: (e: React.ChangeEvent<HTMLSelectElement>) => void;
 	placeholder: string;
-	selectionMode?:string;
-	onSelectionChange?:any;
+	selectionMode?: string;
+	onSelectionChange?: any;
+	defaultValue?: string | number;
 }
 export default function Select({
 	className,
@@ -34,7 +35,7 @@ export default function Select({
 	value,
 	label,
 	selectionMode,
-	onSelectionChange
+	onSelectionChange,
 }: SelectProps) {
 	return (
 		<div>
@@ -48,7 +49,13 @@ export default function Select({
 				classNames={{
 					value: `text-${textAlign}`,
 				}}
-				selectedKeys={onSelectionChange && value ? value : undefined || value ? [value] : undefined}
+				selectedKeys={
+					onSelectionChange && value
+						? value
+						: undefined || value
+							? [value]
+							: undefined
+				}
 				selectionMode={selectionMode ? "multiple" : "single"}
 				className={className}
 				onChange={onChange}
