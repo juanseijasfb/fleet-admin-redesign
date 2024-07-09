@@ -19,7 +19,7 @@ export default function ModalForm({
 	children,
 }: ModalFormProps) {
 	return (
-		<Modal isOpen={isOpen} onOpenChange={onOpenChange}>
+		<Modal isOpen={isOpen} onOpenChange={onOpenChange} className="overflow-y-visible">
 			<ModalContent>
 				{(onClose) => (
 					<>

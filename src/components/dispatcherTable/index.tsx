@@ -32,10 +32,10 @@ const statusColorMap: Record<DriverStatus, "success" | "danger"> = {
 
 interface DispatcherTableProps {
 	rows: Dispatcher[];
-	onMultipleSelect?: (selected: Dispatcher[]) => void;
+	onMultipleSelect: (selected: Dispatcher[]) => void;
 }
 
-export default function DispatcherTable({ rows }: DispatcherTableProps) {
+export default function DispatcherTable({ rows, onMultipleSelect }: DispatcherTableProps) {
 	const [selectedKeys, setSelectedKeys] = React.useState<Selection>(new Set());
 	const [page, setPage] = React.useState(1);
 	const rowsPerPage = 6;
@@ -68,7 +68,7 @@ export default function DispatcherTable({ rows }: DispatcherTableProps) {
 				case "name":
 					return (
 						<span>
-							<span>{dispatcher.firstName} </span>
+							<span>{dispatcher.firstName}</span>
 							<span>{dispatcher.lastName}</span>
 						</span>
 					);
@@ -90,6 +90,7 @@ export default function DispatcherTable({ rows }: DispatcherTableProps) {
 								</Button>
 							</DropdownTrigger>
 							<DropdownMenu>
+                				<DropdownItem onClick={() => onMultipleSelect([dispatcher])}>Assign driver</DropdownItem>
 								<DropdownItem>Edit</DropdownItem>
 								<DropdownItem>Delete</DropdownItem>
 							</DropdownMenu>
@@ -102,24 +103,8 @@ export default function DispatcherTable({ rows }: DispatcherTableProps) {
 		[],
 	);
 
-	return (
-		<div>
-			<div className="flex justify-start min-h-10 mb-4">
-				{/* {new Set(selectedKeys).size > 0 && (
-					<Button
-						color="primary"
-						onClick={() => {
-							const selectedDrivers = Array.from(selectedKeys).map((key) => (
-								<p>{key}</p>
-							));
-							console.log(selectedDrivers);
-						}}
-					>
-						Modify Restrictions
-					</Button>
-				)} */}
-			</div>
-
+  return (
+    	<div>
 			<Table
 				aria-label="Example table with custom cells"
 				bottomContent={
