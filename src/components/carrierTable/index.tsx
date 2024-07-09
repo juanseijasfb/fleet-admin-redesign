@@ -23,10 +23,10 @@ import { Carrier } from "@/utils/types";
 
 interface CarrierTableProps {
   rows: Carrier[];
-  onMultipleSelect?: (selected: Carrier[]) => void;
+  onMultipleSelect: (selected: Carrier[]) => void;
 }
 
-export default function CarrierTable({ rows }: CarrierTableProps) {
+export default function CarrierTable({ rows, onMultipleSelect }: CarrierTableProps) {
   const [selectedKeys, setSelectedKeys] = React.useState<Selection>(new Set());
   const [page, setPage] = React.useState(1);
   const [indice, setIndice] = React.useState(0);
@@ -55,6 +55,7 @@ export default function CarrierTable({ rows }: CarrierTableProps) {
                 </Button>
               </DropdownTrigger>
               <DropdownMenu>
+                <DropdownItem onClick={() => onMultipleSelect([carrier])}>Add restriction broker</DropdownItem>
                 <DropdownItem>Edit</DropdownItem>
                 <DropdownItem>Delete</DropdownItem>
               </DropdownMenu>
