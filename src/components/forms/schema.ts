@@ -33,3 +33,6 @@ export const restrictionDriveSchema = Yup.object().shape({
 	city: Yup.string().required("City is required"),
 	state: Yup.string().required("State is required"),
 })
+export const addRestrictionBrokerSchema = Yup.object().shape({
+	mcNumber: Yup.string().required("Broker is required"),
+})

@@ -76,3 +76,8 @@ export type DriverUnassignedResponseAPI = {
 	driverId: number;
 	fullName: string;
 }
+
+export type BrokerResponseAPI = {
+	MCNumber: number,
+	CompanyName: string
+}

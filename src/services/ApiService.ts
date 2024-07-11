@@ -8,6 +8,7 @@ import {
 	type DriverUnassignedResponseAPI,
 	type DriverResponseAPI,
 	DriverStatus,
+	BrokerResponseAPI,
 } from "@/utils/types";
 
 export default class ApiService {
@@ -267,5 +268,13 @@ export default class ApiService {
 		} catch (error) {
 			console.error("Error:", error);
 		}
+	}
+
+	async getBrokerList(){
+		const brokers = await this.request<BrokerResponseAPI[]>(
+			`/getBrokerList?MCNumbers=131,76,138`,
+			"GET",
+		);
+		return brokers
 	}
 }

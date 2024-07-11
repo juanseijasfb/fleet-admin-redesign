@@ -8,9 +8,11 @@ import useGetCarriers from "@/hooks/api/useGetCarriers";
 import { Button, useDisclosure } from "@nextui-org/react";
 import React, { useState } from "react";
 import AddRestrictionCarrier from "@/components/forms/AddRestrictionCarrier";
+import { useGetBrokerList } from "@/hooks/api/useGetBroker";
 
 export default function index() {
 	const { carriers } = useGetCarriers();
+	const { listBroker, isLoadingBroker } = useGetBrokerList();
 	const modal = useDisclosure();
 	const modalRestriction = useDisclosure();
 	const [companyName, setCompanyName] = useState("");
@@ -18,11 +20,13 @@ export default function index() {
 		modal.onClose();
 	});
 	const handlerModalRestriction = (e:any) => {
-		console.log(e[0].mcNumber)
 		setCompanyName(e[0].carrier)
 		modalRestriction.onOpen();
 	}
-
+	const handleSubmit = (values: any) => {
+		console.log(values);
+		modalRestriction.onClose();
+	}
 	return (
 		<LayoutDashboard>
 			<HeaderDashboard
@@ -43,9 +47,10 @@ export default function index() {
 			<ModalForm isOpen={modalRestriction.isOpen} onOpenChange={modalRestriction.onOpenChange}>
 				<AddRestrictionCarrier
 					onClose={() => modalRestriction.onClose()}
-					isLoading={isPending}
-					onSubmit={(values) => console.log(values)}
+					isLoading={isLoadingBroker}
+					onSubmit={(values) => handleSubmit(values)}
 					companyName={companyName}
+					listBroker={listBroker}
 				/>
 			</ModalForm>
 		</LayoutDashboard>
