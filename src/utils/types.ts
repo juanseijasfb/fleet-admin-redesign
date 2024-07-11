@@ -76,3 +76,8 @@ export type DriverUnassignedResponseAPI = {
 	driverId: number;
 	fullName: string;
 }
+
+export type GetCitiesResponseAPI = {
+	city: string,
+	state_id: string
+}

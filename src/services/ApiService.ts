@@ -8,6 +8,7 @@ import {
 	type DriverUnassignedResponseAPI,
 	type DriverResponseAPI,
 	DriverStatus,
+	GetCitiesResponseAPI,
 } from "@/utils/types";
 
 export default class ApiService {
@@ -267,5 +268,18 @@ export default class ApiService {
 		} catch (error) {
 			console.error("Error:", error);
 		}
+	}
+
+	async getCitiesListByState({search}: {search?: string}) {
+		const params = new URLSearchParams();
+		if (search) {
+			params.append("state", search);
+		}
+		const getCities = await this.request<GetCitiesResponseAPI[]>(
+			`/getCitiesListByState?${params.toString()}`,
+			"GET",
+		);
+
+		return getCities;
 	}
 }
