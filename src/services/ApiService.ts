@@ -24,12 +24,17 @@ export default class ApiService {
 	// 	return response;
 	// };
 
-	async request<T>(path: string, method: string, body?: RequestInit) {
+	async request<T>(
+		path: string,
+		method: string,
+		contentType?: string,
+		body?: RequestInit,
+	) {
 		console.log("API_URL", API_URL);
 		const response = await fetch(`${API_URL}${path}`, {
 			method,
 			headers: {
-				"Content-Type": "application/json",
+				"Content-Type": contentType || "application/json",
 			},
 			...body,
 		});
@@ -130,12 +135,6 @@ export default class ApiService {
 		const response = await this.request(
 			`/addDriver?${params.toString()}`,
 			"POST",
-			{
-				headers: {
-					// x-www-form-urlencoded
-					"Content-Type": "application/x-www-form-urlencoded",
-				},
-			},
 		);
 		return response;
 	}
@@ -156,11 +155,7 @@ export default class ApiService {
 		const response = await this.request(
 			`/addDispatcher?${params.toString()}`,
 			"POST",
-			{
-				headers: {
-					"Content-Type": "application/x-www-form-urlencoded",
-				},
-			},
+			"application/x-www-form-urlencoded",
 		);
 	}
 
@@ -289,5 +284,27 @@ export default class ApiService {
 		);
 
 		return getCities;
+	}
+	async activeDisableDriver(disableDriverBody: {
+		driversId: number;
+		disable: boolean;
+	}) {
+		console.log(disableDriverBody.driversId.toString());
+		const params = new URLSearchParams();
+		params.append("driversId", disableDriverBody.driversId.toString());
+
+		try {
+			const response = await this.request<any[]>(
+				disableDriverBody.disable ? "/disableDrivers" : "/enableDrivers",
+				"POST",
+				"application/x-www-form-urlencoded",
+				{
+					body: params.toString(),
+				},
+			);
+			console.log(response);
+		} catch (error) {
+			console.error("Error:", error);
+		}
 	}
 }

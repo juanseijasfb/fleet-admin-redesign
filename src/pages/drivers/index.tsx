@@ -2,7 +2,7 @@ import HeaderDashboard from "@/components/HeaderDashboard";
 import LayoutDashboard from "@/components/LayoutDashboard";
 import DriverTable from "@/components/driversTable";
 import useGetDrivers from "@/hooks/api/useGetDrivers";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { type Selection, useDisclosure } from "@nextui-org/react";
 import ModalForm from "@/components/ModalForm";
 import AddDriverForm from "@/components/forms/AddDriverForm";
@@ -12,13 +12,16 @@ import UpdateDriverForm, {
 } from "@/components/forms/UpdateDriverForm";
 import type { AddRestrictionDriverValues } from "@/components/forms/AddRestrictionDriverForm";
 import AddRestrictionDriverForm from "@/components/forms/AddRestrictionDriverForm";
+import { Driver } from "@/utils/types";
+import { useDisableDriver, useEnableDriver } from "@/hooks/api/useChangeStatusDriver";
 
 export default function index() {
-	const { isLoading, isError, drivers } = useGetDrivers();
-	const [showButton, setShowButton] = React.useState(false);
-	const [selectedDriver, setSelectedDriver] = useState<UpdateDriverValues[]>(
-		[],
-	);
+	const { isLoading, isError, drivers ,refetchDrivers } = useGetDrivers();
+	const [selectedDriverId, setSelectedDriverId] = useState<number>(0);
+	const [optionSelected, setOptionSelect] = useState<string>(); 
+	const [selectedDriver, setSelectedDriver] = useState<UpdateDriverValues[]>([]);
+	const { disableDriver } = useDisableDriver(selectedDriverId);
+	const { enableDriver } = useEnableDriver(selectedDriverId);
 	const [selectedKeys, setSelectedKeys] = React.useState<Selection>(new Set());
 	const modal = useDisclosure();
 	const modalUpdate = useDisclosure();
@@ -27,9 +30,40 @@ export default function index() {
 		modal.onClose();
 	});
 
-	const handlerModalUpdate = (e: any) => {
-		setSelectedDriver(e);
-		modalUpdate.onOpen();
+	useEffect(() => {
+		switch (optionSelected) {
+			case "disable":
+				disableDriver();
+				refetchDrivers();
+				break;
+			case "enable":
+				enableDriver();
+				refetchDrivers();
+				break;
+			default:
+				refetchDrivers();
+				break;
+		}
+		setOptionSelect("");
+		setSelectedDriverId(0);
+  	}, [optionSelected, selectedDriverId]);
+
+	const handlerMultipleSelect = (e: any[], optionSelect: string) => {
+		setOptionSelect(optionSelect)
+		switch (optionSelect) {
+		case "edit":
+			setSelectedDriver(e);
+			modalUpdate.onOpen();
+			break;
+		case "disable":
+			setSelectedDriverId(e[0].id);
+			break;
+		case "enable":
+			setSelectedDriverId(e[0].id);
+			break;
+		default:
+			break;
+		}
 	};
 	const handlerRestriction = (e: AddRestrictionDriverValues) => {
 		console.log(e);
@@ -68,7 +102,7 @@ export default function index() {
 					rows={drivers ?? []}
 					selectedKeys={selectedKeys}
 					setSelectedKeys={setSelectedKeys}
-					onMultipleSelect={handlerModalUpdate}
+					onMultipleSelect={(selectedDriver: Driver[], optionSelect:string) => handlerMultipleSelect(selectedDriver, optionSelect)}
 				/>
 			</div>
 			<ModalForm isOpen={modal.isOpen} onOpenChange={modal.onOpenChange}>

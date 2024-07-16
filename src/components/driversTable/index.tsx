@@ -32,7 +32,7 @@ const statusColorMap: Record<DriverStatus, "success" | "danger"> = {
 
 interface DriverTableProps {
 	rows: Driver[];
-	onMultipleSelect: (selected: Driver[]) => void;
+	onMultipleSelect: (selectedDriver: Driver[], optionSelect:string) => void;
 	selectedKeys: Selection;
 	setSelectedKeys: React.Dispatch<React.SetStateAction<Selection>>;
 }
@@ -91,7 +91,9 @@ export default function DriverTable({
 								</Button>
 							</DropdownTrigger>
 							<DropdownMenu>
-								<DropdownItem onClick={() => onMultipleSelect([driver])}>Edit</DropdownItem>
+								<DropdownItem onClick={() => onMultipleSelect([driver], "disable")}>Disable</DropdownItem>
+								<DropdownItem onClick={() => onMultipleSelect([driver], "enable")}>Enable</DropdownItem>
+								<DropdownItem onClick={() => onMultipleSelect([driver], "edit")}>Edit</DropdownItem>
 								<DropdownItem>Delete</DropdownItem>
 							</DropdownMenu>
 						</Dropdown>
