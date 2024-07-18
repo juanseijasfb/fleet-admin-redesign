@@ -1,12 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
 import ApiService from "@/services/ApiService";
 
-export default function useGetDispatchers() {
+export default function useGetDispatchers({ search }: { search?: string }) {
 	const { data, isLoading, isError } = useQuery({
-		queryKey: ["dispatchers"],
+		queryKey: ["dispatchers", search],
 		queryFn: async () => {
 			const api = new ApiService();
-			return api.getDispatcher({});
+			return api.getDispatcher({
+				search,
+			});
 		},
 	});
 

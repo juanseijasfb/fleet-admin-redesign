@@ -12,6 +12,7 @@ import {
 	getKeyValue,
 	Pagination,
 	Selection,
+	Spinner,
 } from "@nextui-org/react";
 import {
 	Dropdown,
@@ -21,9 +22,9 @@ import {
 	Button,
 } from "@nextui-org/react";
 
-import { ColumnKeys, columns } from "./data";
+import { type ColumnKeys, columns } from "./data";
 import { BsThreeDotsVertical } from "react-icons/bs";
-import { Driver, DriverStatus } from "@/utils/types";
+import { type Driver, DriverStatus } from "@/utils/types";
 
 const statusColorMap: Record<DriverStatus, "success" | "danger"> = {
 	[DriverStatus.Active]: "success",
@@ -32,16 +33,14 @@ const statusColorMap: Record<DriverStatus, "success" | "danger"> = {
 
 interface DriverTableProps {
 	rows: Driver[];
-	onMultipleSelect: (selectedDriver: Driver[], optionSelect:string) => void;
-	selectedKeys: Selection;
-	setSelectedKeys: React.Dispatch<React.SetStateAction<Selection>>;
+	onMultipleSelect: (selectedDriver: Driver[], optionSelect: string) => void;
+	isLoading?: boolean;
 }
 
 export default function DriverTable({
 	rows,
-	selectedKeys,
-	setSelectedKeys,
-	onMultipleSelect
+	onMultipleSelect,
+	isLoading,
 }: DriverTableProps) {
 	const [page, setPage] = React.useState(1);
 	const rowsPerPage = 6;
@@ -55,6 +54,7 @@ export default function DriverTable({
 		return rows.slice(start, end);
 	}, [page, rows]);
 
+	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
 	const renderCell = React.useCallback(
 		(driver: Driver, columnKey: ColumnKeys) => {
 			const cellValue = driver[columnKey as keyof Driver];
@@ -91,10 +91,21 @@ export default function DriverTable({
 								</Button>
 							</DropdownTrigger>
 							<DropdownMenu>
-								<DropdownItem onClick={() => onMultipleSelect([driver], "disable")}>Disable</DropdownItem>
-								<DropdownItem onClick={() => onMultipleSelect([driver], "enable")}>Enable</DropdownItem>
-								<DropdownItem onClick={() => onMultipleSelect([driver], "edit")}>Edit</DropdownItem>
-								<DropdownItem>Delete</DropdownItem>
+								<DropdownItem
+									onClick={() => onMultipleSelect([driver], "disable")}
+								>
+									Disable
+								</DropdownItem>
+								<DropdownItem
+									onClick={() => onMultipleSelect([driver], "enable")}
+								>
+									Enable
+								</DropdownItem>
+								<DropdownItem
+									onClick={() => onMultipleSelect([driver], "edit")}
+								>
+									Edit
+								</DropdownItem>
 							</DropdownMenu>
 						</Dropdown>
 					);
@@ -108,12 +119,7 @@ export default function DriverTable({
 	return (
 		<div>
 			<Table
-				selectionMode="multiple"
 				aria-label="Example table with custom cells"
-				selectedKeys={selectedKeys}
-				onSelectionChange={(key) => {
-					setSelectedKeys(key);
-				}}
 				bottomContent={
 					<div className="flex w-full justify-center">
 						<Pagination
@@ -138,7 +144,11 @@ export default function DriverTable({
 						</TableColumn>
 					)}
 				</TableHeader>
-				<TableBody items={items}>
+				<TableBody
+					loadingState={isLoading ? "loading" : "idle"}
+					loadingContent={<Spinner />}
+					items={items}
+				>
 					{(item) => (
 						<TableRow key={item.id}>
 							{(columnKey) => (

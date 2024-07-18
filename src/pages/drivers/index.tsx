@@ -12,14 +12,23 @@ import UpdateDriverForm, {
 } from "@/components/forms/UpdateDriverForm";
 import type { AddRestrictionDriverValues } from "@/components/forms/AddRestrictionDriverForm";
 import AddRestrictionDriverForm from "@/components/forms/AddRestrictionDriverForm";
-import { Driver } from "@/utils/types";
-import { useDisableDriver, useEnableDriver } from "@/hooks/api/useChangeStatusDriver";
+import type { Driver } from "@/utils/types";
+import {
+	useDisableDriver,
+	useEnableDriver,
+} from "@/hooks/api/useChangeStatusDriver";
+import useSearch from "@/hooks/useSearch";
 
 export default function index() {
-	const { isLoading, isError, drivers ,refetchDrivers } = useGetDrivers();
+	const { search, handleSearch, debounced } = useSearch("drivers");
+
+	const { isLoading, isError, drivers, refetchDrivers } =
+		useGetDrivers(debounced);
 	const [selectedDriverId, setSelectedDriverId] = useState<number>(0);
-	const [optionSelected, setOptionSelect] = useState<string>(); 
-	const [selectedDriver, setSelectedDriver] = useState<UpdateDriverValues[]>([]);
+	const [optionSelected, setOptionSelect] = useState<string>();
+	const [selectedDriver, setSelectedDriver] = useState<UpdateDriverValues[]>(
+		[],
+	);
 	const { disableDriver } = useDisableDriver(selectedDriverId);
 	const { enableDriver } = useEnableDriver(selectedDriverId);
 	const [selectedKeys, setSelectedKeys] = React.useState<Selection>(new Set());
@@ -30,6 +39,7 @@ export default function index() {
 		modal.onClose();
 	});
 
+	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
 	useEffect(() => {
 		switch (optionSelected) {
 			case "disable":
@@ -46,23 +56,23 @@ export default function index() {
 		}
 		setOptionSelect("");
 		setSelectedDriverId(0);
-  	}, [optionSelected, selectedDriverId]);
+	}, [optionSelected, selectedDriverId]);
 
 	const handlerMultipleSelect = (e: any[], optionSelect: string) => {
-		setOptionSelect(optionSelect)
+		setOptionSelect(optionSelect);
 		switch (optionSelect) {
-		case "edit":
-			setSelectedDriver(e);
-			modalUpdate.onOpen();
-			break;
-		case "disable":
-			setSelectedDriverId(e[0].id);
-			break;
-		case "enable":
-			setSelectedDriverId(e[0].id);
-			break;
-		default:
-			break;
+			case "edit":
+				setSelectedDriver(e);
+				modalUpdate.onOpen();
+				break;
+			case "disable":
+				setSelectedDriverId(e[0].id);
+				break;
+			case "enable":
+				setSelectedDriverId(e[0].id);
+				break;
+			default:
+				break;
 		}
 	};
 	const handlerRestriction = (e: AddRestrictionDriverValues) => {
@@ -83,6 +93,8 @@ export default function index() {
 				placeholderSearch="Search Driver"
 				showButton={selectedKeys === "all" || selectedKeys.size > 0}
 				actionButtonText="Modify Restrictions"
+				defaultSearch={search}
+				onChangeSearch={(e) => handleSearch(e.target.value)}
 				addButtonAction={() => {
 					modal.onOpen();
 				}}
@@ -99,14 +111,16 @@ export default function index() {
 
 			<div className="px-10 max-w-[100%]">
 				<DriverTable
+					isLoading={isLoading}
 					rows={drivers ?? []}
-					selectedKeys={selectedKeys}
-					setSelectedKeys={setSelectedKeys}
-					onMultipleSelect={(selectedDriver: Driver[], optionSelect:string) => handlerMultipleSelect(selectedDriver, optionSelect)}
+					onMultipleSelect={(selectedDriver: Driver[], optionSelect: string) =>
+						handlerMultipleSelect(selectedDriver, optionSelect)
+					}
 				/>
 			</div>
 			<ModalForm isOpen={modal.isOpen} onOpenChange={modal.onOpenChange}>
 				<AddDriverForm
+					type="create"
 					isLoading={isPending}
 					onSubmit={(values) => {
 						createDriver(values);

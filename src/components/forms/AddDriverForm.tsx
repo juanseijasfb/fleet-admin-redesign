@@ -20,11 +20,13 @@ interface AddDriverFormProps {
 	onSubmit: (values: AddDriverValues) => void;
 	initialValues?: AddDriverValues;
 	isLoading?: boolean;
+	type: "create" | "edit";
 }
 export default function AddDriverForm({
 	onSubmit,
 	initialValues,
 	isLoading,
+	type = "create",
 }: AddDriverFormProps) {
 	const { values, errors, handleBlur, handleChange, handleSubmit } = useFormik({
 		initialValues: {
@@ -33,17 +35,19 @@ export default function AddDriverForm({
 			email: initialValues?.email || "",
 			mcNumber: initialValues?.mcNumber || "",
 			carrierName: initialValues?.carrierName || "",
-			maxLoadWeight: initialValues?.maxLoadWeight || "",
+			maxLoadWeight: initialValues?.maxLoadWeight || "99999",
 			trailerType: initialValues?.trailerType || "",
 		},
 		validationSchema: driverSchema,
 		onSubmit: onSubmit,
 	});
 
-	console.log("values", errors);
+	console.log("values", initialValues);
 	return (
 		<div className="flex flex-col gap-8 py-4">
-			<h3 className="font-bold text-2xl pt-2">Create Driver</h3>
+			<h3 className="font-bold text-2xl pt-2">
+				{type === "create" ? "Create" : "Update"} Driver
+			</h3>
 			<div className="grid md:grid-cols-2 gap-4">
 				<TextInput
 					label="First Name"
@@ -91,7 +95,7 @@ export default function AddDriverForm({
 			/>
 			<Select
 				size="lg"
-				value={values.trailerType}
+				value={"V"}
 				onChange={handleChange("trailerType")}
 				isValid={!errors.trailerType}
 				errorMessage={errors.trailerType}

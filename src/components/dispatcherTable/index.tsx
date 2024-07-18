@@ -10,8 +10,9 @@ import {
 	Chip,
 	Tooltip,
 	getKeyValue,
+	Spinner,
 	Pagination,
-	Selection,
+	type Selection,
 } from "@nextui-org/react";
 import {
 	Dropdown,
@@ -21,9 +22,9 @@ import {
 	Button,
 } from "@nextui-org/react";
 
-import { ColumnKeys, columns } from "./data";
+import { type ColumnKeys, columns } from "./data";
 import { BsThreeDotsVertical } from "react-icons/bs";
-import { Dispatcher, Driver, DriverStatus } from "@/utils/types";
+import { type Dispatcher, Driver, DriverStatus } from "@/utils/types";
 
 const statusColorMap: Record<DriverStatus, "success" | "danger"> = {
 	[DriverStatus.Active]: "success",
@@ -33,9 +34,14 @@ const statusColorMap: Record<DriverStatus, "success" | "danger"> = {
 interface DispatcherTableProps {
 	rows: Dispatcher[];
 	onMultipleSelect: (selected: Dispatcher[]) => void;
+	isLoading: boolean;
 }
 
-export default function DispatcherTable({ rows, onMultipleSelect }: DispatcherTableProps) {
+export default function DispatcherTable({
+	rows,
+	onMultipleSelect,
+	isLoading,
+}: DispatcherTableProps) {
 	const [selectedKeys, setSelectedKeys] = React.useState<Selection>(new Set());
 	const [page, setPage] = React.useState(1);
 	const rowsPerPage = 6;
@@ -49,6 +55,7 @@ export default function DispatcherTable({ rows, onMultipleSelect }: DispatcherTa
 		return rows.slice(start, end);
 	}, [page, rows]);
 
+	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
 	const renderCell = React.useCallback(
 		(dispatcher: Dispatcher, columnKey: ColumnKeys) => {
 			const cellValue = dispatcher[columnKey as keyof Dispatcher];
@@ -68,7 +75,10 @@ export default function DispatcherTable({ rows, onMultipleSelect }: DispatcherTa
 				case "name":
 					return (
 						<span>
-							<span>{dispatcher.firstName}</span>
+							<span>
+								{dispatcher.firstName}
+								{"   "}
+							</span>
 							<span>{dispatcher.lastName}</span>
 						</span>
 					);
@@ -90,9 +100,11 @@ export default function DispatcherTable({ rows, onMultipleSelect }: DispatcherTa
 								</Button>
 							</DropdownTrigger>
 							<DropdownMenu>
-                				<DropdownItem onClick={() => onMultipleSelect([dispatcher])}>Assign driver</DropdownItem>
-								<DropdownItem>Edit</DropdownItem>
-								<DropdownItem>Delete</DropdownItem>
+								<DropdownItem onClick={() => onMultipleSelect([dispatcher])}>
+									Assign driver
+								</DropdownItem>
+								{/* <DropdownItem>Edit</DropdownItem>
+								<DropdownItem>Delete</DropdownItem> */}
 							</DropdownMenu>
 						</Dropdown>
 					);
@@ -103,8 +115,8 @@ export default function DispatcherTable({ rows, onMultipleSelect }: DispatcherTa
 		[],
 	);
 
-  return (
-    	<div>
+	return (
+		<div>
 			<Table
 				aria-label="Example table with custom cells"
 				bottomContent={
@@ -131,7 +143,11 @@ export default function DispatcherTable({ rows, onMultipleSelect }: DispatcherTa
 						</TableColumn>
 					)}
 				</TableHeader>
-				<TableBody items={items}>
+				<TableBody
+					loadingState={isLoading ? "loading" : "idle"}
+					loadingContent={<Spinner size="sm" color="primary" />}
+					items={items}
+				>
 					{(item) => (
 						<TableRow key={item.id}>
 							{(columnKey) => (

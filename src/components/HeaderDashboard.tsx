@@ -1,7 +1,12 @@
 import { Button, Input } from "@nextui-org/react";
 import { useRouter } from "next/router";
 import React from "react";
-import { HiOutlinePlus, HiOutlineSearch, HiPencil, HiPencilAlt } from "react-icons/hi";
+import {
+	HiOutlinePlus,
+	HiOutlineSearch,
+	HiPencil,
+	HiPencilAlt,
+} from "react-icons/hi";
 
 interface HeaderDashboardProps {
 	title: string;
@@ -13,6 +18,7 @@ interface HeaderDashboardProps {
 	actionButton?: () => void;
 	addButtonRestriction?: () => void;
 	actionButtonText?: string;
+	defaultSearch?: string;
 }
 export default function HeaderDashboard({
 	title,
@@ -20,6 +26,7 @@ export default function HeaderDashboard({
 	addButtonAction,
 	placeholderSearch,
 	onChangeSearch,
+	defaultSearch,
 	showButton,
 	actionButton,
 	addButtonRestriction,
@@ -44,17 +51,18 @@ export default function HeaderDashboard({
 						placeholder={placeholderSearch}
 						onChange={onChangeSearch}
 						startContent={<HiOutlineSearch size={18} />}
+						value={defaultSearch}
 					/>
 				)}
 				{actionButtonText && (
 					<Button
-					onClick={() => addButtonRestriction?.()}
-					color="primary"
-					className="min-w-48 mx-auto"
-				>
-					<HiPencil size={18} />
-					<span>{actionButtonText}</span>
-				</Button>
+						onClick={() => addButtonRestriction?.()}
+						color="primary"
+						className="min-w-48 mx-auto"
+					>
+						<HiPencil size={18} />
+						<span>{actionButtonText}</span>
+					</Button>
 				)}
 				{addButtonText && (
 					<Button

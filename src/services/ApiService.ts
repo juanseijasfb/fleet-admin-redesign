@@ -11,6 +11,7 @@ import {
 	type BrokerResponseAPI,
 	type GetCitiesResponseAPI,
 } from "@/utils/types";
+import axios from "axios";
 
 export default class ApiService {
 	// request = async (path: string, method: string, body?: RequestInit) => {
@@ -24,37 +25,37 @@ export default class ApiService {
 	// 	return response;
 	// };
 
-	async request<T>(
-		path: string,
-		method: string,
-		contentType?: string,
-		body?: RequestInit,
-	) {
-		console.log("API_URL", API_URL);
-		const response = await fetch(`${API_URL}${path}`, {
+	async request<T>({
+		path,
+		method,
+		headers,
+		body,
+	}: {
+		path: string;
+		method: string;
+		headers?: Record<string, string>;
+		body?: BodyInit;
+	}) {
+		const response = await axios.request({
+			url: `${API_URL}${path}`,
 			method,
-			headers: {
-				"Content-Type": contentType || "application/json",
-			},
-			...body,
+			headers,
+			data: body,
 		});
-		if (!response.ok) {
-			throw new Error("Error fetching data");
-		}
-		const json = await response.json();
 
-		return json as T;
+		return response.data as T;
 	}
 
 	getDrivers = async ({ search }: { search?: string }) => {
 		const params = new URLSearchParams();
+		if (search) {
+			params.append("driver", search);
+		}
 
-		params.append("driver", "");
-
-		const driversResponse = await this.request<DriverResponseAPI[]>(
-			`/getDriversList?${params.toString()}`,
-			"GET",
-		);
+		const driversResponse = await this.request<DriverResponseAPI[]>({
+			path: `/getDriversList?${params.toString()}`,
+			method: "GET",
+		});
 
 		const drivers: Driver[] = driversResponse.map((driver) => ({
 			id: driver.driverId,
@@ -76,10 +77,10 @@ export default class ApiService {
 		if (search) {
 			params.append("dispatcher", search);
 		}
-		const driversResponse = await this.request<DispatcherResponseAPI[]>(
-			`/getDispatcherList?${params.toString()}`,
-			"GET",
-		);
+		const driversResponse = await this.request<DispatcherResponseAPI[]>({
+			path: `/getDispatcherList?${params.toString()}`,
+			method: "GET",
+		});
 
 		const dispatchers = driversResponse.map((dispatcher) => ({
 			id: dispatcher.dispatcherId,
@@ -97,13 +98,14 @@ export default class ApiService {
 
 	async getCarriers({ search }: { search?: string }): Promise<Carrier[]> {
 		const params = new URLSearchParams();
+		if (search && search.length > 0) {
+			params.append("carrier", `${search}%`);
+		}
 
-		params.append("carrier", "");
-
-		const carriersResponse = await this.request<CarrierResponseAPI[]>(
-			`/getCarriersList?${params.toString()}`,
-			"GET",
-		);
+		const carriersResponse = await this.request<CarrierResponseAPI[]>({
+			path: `/getCarriersList?${params.toString()}`,
+			method: "GET",
+		});
 
 		const carriers: Carrier[] = carriersResponse.map((carrier) => ({
 			carrier: carrier.carrier,
@@ -132,10 +134,14 @@ export default class ApiService {
 		params.append("maxWeight", addDriverBody.maxLoadWeight);
 		params.append("trailerType", addDriverBody.trailerType);
 
-		const response = await this.request(
-			`/addDriver?${params.toString()}`,
-			"POST",
-		);
+		const response = await this.request({
+			path: "/addDriver",
+			method: "POST",
+			headers: {
+				"Content-Type": "application/x-www-form-urlencoded",
+			},
+			body: params,
+		});
 		return response;
 	}
 
@@ -152,40 +158,46 @@ export default class ApiService {
 		params.append("dispatcherEmail", addDispatcherBody.dispatcherEmail);
 		params.append("role", addDispatcherBody.role);
 		params.append("enabled", addDispatcherBody.enabled);
-		const response = await this.request(
-			`/addDispatcher?${params.toString()}`,
-			"POST",
-			"application/x-www-form-urlencoded",
-		);
+		params.append("port", "5001");
+		const response = await this.request({
+			path: "/addDispatcher",
+			method: "POST",
+			headers: {
+				"Content-Type": "application/x-www-form-urlencoded",
+			},
+			body: params,
+		});
+
+		return response;
 	}
 
-	async addDispatchFake(addDispatcherBody: {
-		firstName: string;
-		lastName: string;
-		dispatcherEmail: string;
-		role: string;
-		enabled: boolean;
-	}) {
-		const params = new URLSearchParams();
-		params.append("firstName", addDispatcherBody.firstName);
-		params.append("lastName", addDispatcherBody.lastName);
-		params.append("dispatcherEmail", addDispatcherBody.dispatcherEmail);
-		params.append("role", addDispatcherBody.role);
-		params.append("enabled", addDispatcherBody.enabled.toString());
-		try {
-			await new Promise((resolve) => setTimeout(resolve, 1000));
+	// async addDispatch(addDispatcherBody: {
+	// 	firstName: string;
+	// 	lastName: string;
+	// 	dispatcherEmail: string;
+	// 	role: string;
+	// 	enabled: boolean;
+	// }) {
+	// 	const params = new URLSearchParams();
+	// 	params.append("firstName", addDispatcherBody.firstName);
+	// 	params.append("lastName", addDispatcherBody.lastName);
+	// 	params.append("dispatcherEmail", addDispatcherBody.dispatcherEmail);
+	// 	params.append("role", addDispatcherBody.role);
+	// 	params.append("enabled", addDispatcherBody.enabled.toString());
+	// 	try {
+	// 		await new Promise((resolve) => setTimeout(resolve, 1000));
 
-			const response = {
-				mensaje: "Dispatche creado exitosamente",
-				datos: addDispatcherBody,
-			};
-			console.log(response);
+	// 		const response = {
+	// 			mensaje: "Dispatche creado exitosamente",
+	// 			datos: addDispatcherBody,
+	// 		};
+	// 		console.log(response);
 
-			return response;
-		} catch (error) {
-			console.error("Error:", error);
-		}
-	}
+	// 		return response;
+	// 	} catch (error) {
+	// 		console.error("Error:", error);
+	// 	}
+	// }
 
 	async addCarrier(addCarrierBody: {
 		mc: string;
@@ -215,10 +227,10 @@ export default class ApiService {
 			params.append("dispacher", search);
 		}
 
-		const driverAssigned = await this.request<DriverAssignedResponseAPI[]>(
-			`/getMyDriversList?${params.toString()}`,
-			"GET",
-		);
+		const driverAssigned = await this.request<DriverAssignedResponseAPI[]>({
+			path: `/getMyDriversList?${params.toString()}`,
+			method: "GET",
+		});
 
 		return driverAssigned;
 	}
@@ -229,10 +241,10 @@ export default class ApiService {
 			params.append("dispatcher", search);
 		}
 
-		const driverAssigned = await this.request<DriverUnassignedResponseAPI[]>(
-			`/getUnassignedDriversList?${params.toString()}`,
-			"GET",
-		);
+		const driverAssigned = await this.request<DriverUnassignedResponseAPI[]>({
+			path: `/getUnassignedDriversList?${params.toString()}`,
+			method: "GET",
+		});
 
 		return driverAssigned;
 	}
@@ -267,10 +279,10 @@ export default class ApiService {
 	}
 
 	async getBrokerList() {
-		const brokers = await this.request<BrokerResponseAPI[]>(
-			"/getBrokerList?MCNumbers=131,76,138",
-			"GET",
-		);
+		const brokers = await this.request<BrokerResponseAPI[]>({
+			path: "/getBrokerList?MCNumbers=131,76,138",
+			method: "GET",
+		});
 		return brokers;
 	}
 	async getCitiesListByState({ search }: { search?: string }) {
@@ -278,13 +290,14 @@ export default class ApiService {
 		if (search) {
 			params.append("state", search);
 		}
-		const getCities = await this.request<GetCitiesResponseAPI[]>(
-			`/getCitiesListByState?${params.toString()}`,
-			"GET",
-		);
+		const getCities = await this.request<GetCitiesResponseAPI[]>({
+			path: `/getCitiesListByState?${params.toString()}`,
+			method: "GET",
+		});
 
 		return getCities;
 	}
+
 	async activeDisableDriver(disableDriverBody: {
 		driversId: number;
 		disable: boolean;
@@ -294,15 +307,17 @@ export default class ApiService {
 		params.append("driversId", disableDriverBody.driversId.toString());
 
 		try {
-			const response = await this.request<any[]>(
-				disableDriverBody.disable ? "/disableDrivers" : "/enableDrivers",
-				"POST",
-				"application/x-www-form-urlencoded",
-				{
-					body: params.toString(),
+			const url = disableDriverBody.disable
+				? "/disableDrivers"
+				: "/enableDrivers";
+			const response = await this.request<any[]>({
+				path: `${url}`,
+				method: "POST",
+				headers: {
+					"Content-Type": "application/x-www-form-urlencoded",
 				},
-			);
-			console.log(response);
+				body: params,
+			});
 		} catch (error) {
 			console.error("Error:", error);
 		}
