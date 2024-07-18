@@ -8,7 +8,8 @@ import {
 	type DriverUnassignedResponseAPI,
 	type DriverResponseAPI,
 	DriverStatus,
-	BrokerResponseAPI,
+	type BrokerResponseAPI,
+	type GetCitiesResponseAPI,
 } from "@/utils/types";
 
 export default class ApiService {
@@ -270,11 +271,23 @@ export default class ApiService {
 		}
 	}
 
-	async getBrokerList(){
+	async getBrokerList() {
 		const brokers = await this.request<BrokerResponseAPI[]>(
-			`/getBrokerList?MCNumbers=131,76,138`,
+			"/getBrokerList?MCNumbers=131,76,138",
 			"GET",
 		);
-		return brokers
+		return brokers;
+	}
+	async getCitiesListByState({ search }: { search?: string }) {
+		const params = new URLSearchParams();
+		if (search) {
+			params.append("state", search);
+		}
+		const getCities = await this.request<GetCitiesResponseAPI[]>(
+			`/getCitiesListByState?${params.toString()}`,
+			"GET",
+		);
+
+		return getCities;
 	}
 }

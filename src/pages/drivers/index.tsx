@@ -36,6 +36,11 @@ export default function index() {
 		modalRestriction.onClose();
 	};
 
+	const driversList = drivers?.map((e) => ({
+		label: e.firstName.replace(/,/g," "),
+		value: e.id
+	}));
+
 	return (
 		<LayoutDashboard>
 			<HeaderDashboard
@@ -94,6 +99,7 @@ export default function index() {
 				<AddRestrictionDriverForm
 					onClose={modalRestriction.onClose}
 					onSubmit={(e: AddRestrictionDriverValues) => handlerRestriction(e)}
+					driverList={driversList ?? []}
 				/>
 			</ModalForm>
 		</LayoutDashboard>

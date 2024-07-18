@@ -59,25 +59,29 @@ export type Carrier = {
 };
 
 export type DriverAssignedResponseAPI = {
-	dispacherId: string,
-    driverId: number,
-    FirstName: string,
-    LastName: string,
-    Equipment: string,
-    Carrier: string,
-    MCNumber: number,
-    maxWeight: number,
-    email: string,
-    enabled: number,
-    fullName: string
-}
+	dispacherId: string;
+	driverId: number;
+	FirstName: string;
+	LastName: string;
+	Equipment: string;
+	Carrier: string;
+	MCNumber: number;
+	maxWeight: number;
+	email: string;
+	enabled: number;
+	fullName: string;
+};
 
 export type DriverUnassignedResponseAPI = {
 	driverId: number;
 	fullName: string;
-}
+};
 
 export type BrokerResponseAPI = {
-	MCNumber: number,
-	CompanyName: string
-}
+	MCNumber: number;
+	CompanyName: string;
+};
+export type GetCitiesResponseAPI = {
+	city: string;
+	state_id: string;
+};
