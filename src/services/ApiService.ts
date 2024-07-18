@@ -150,14 +150,14 @@ export default class ApiService {
 		lastName: string;
 		dispatcherEmail: string;
 		role: string;
-		enabled: string;
+		enabled: boolean;
 	}) {
 		const params = new URLSearchParams();
 		params.append("firstName", addDispatcherBody.firstName);
 		params.append("lastName", addDispatcherBody.lastName);
 		params.append("dispatcherEmail", addDispatcherBody.dispatcherEmail);
 		params.append("role", addDispatcherBody.role);
-		params.append("enabled", addDispatcherBody.enabled);
+		params.append("enabled", addDispatcherBody.enabled.toString());
 		params.append("port", "5001");
 		const response = await this.request({
 			path: "/addDispatcher",

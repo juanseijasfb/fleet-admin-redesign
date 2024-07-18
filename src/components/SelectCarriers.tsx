@@ -14,9 +14,9 @@ export default function SelectCarriers({
 	value,
 	isValid,
 	errorMessage,
-	defaultSelectedKeys
+	defaultSelectedKeys,
 }: SelectCarriersProps) {
-	const { carriers, isLoading, isError } = useGetCarriers();
+	const { carriers, isLoading, isError } = useGetCarriers("");
 	return (
 		<Select
 			size="lg"

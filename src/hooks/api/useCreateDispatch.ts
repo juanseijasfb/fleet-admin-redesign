@@ -1,4 +1,4 @@
-import { AddDispatchValues } from "@/components/forms/AddDispatchForm";
+import type { AddDispatchValues } from "@/components/forms/AddDispatchForm";
 import ApiService from "@/services/ApiService";
 import { useMutation } from "@tanstack/react-query";
 
