@@ -8,16 +8,19 @@ import { GetCitiesResponseAPI } from "@/utils/types";
 import Selecting from "react-select";
 
 export interface AddRestrictionDriverValues {
-	driver: string;
-	city: string;
-	state: string;
+	subject: string;
+	state?: string;
+	type: string;
+	subjectValue: string;
+	typeValue: string;
+	validUntil: string;
 }
 interface AddRestrictionDriverProps {
 	onClose: () => void;
 	onSubmit: (values: AddRestrictionDriverValues) => void;
 	isLoading?: boolean;
 	initialValues?: AddRestrictionDriverValues;
-	driverList: { label: string; value: number }[];
+	driverList: { label: string; value: string }[];
 }
 
 const handlerGetStates = (cities: GetCitiesResponseAPI[]) => {
@@ -31,7 +34,7 @@ const handlerGetStates = (cities: GetCitiesResponseAPI[]) => {
 		})
 		.map((city) => ({
 			label: city.city,
-			value: city.city,
+			value: city.city+":"+city.state_id,
 		}));
 };
 
@@ -44,17 +47,17 @@ export default function AddRestrictionDriverForm({
 }: AddRestrictionDriverProps) {
 	const { values, errors, handleSubmit, setFieldValue } = useFormik({
 		initialValues: {
-			driver: initialValues?.driver || "",
-			city: initialValues?.city || "",
+			subject: "D",
 			state: initialValues?.state || "",
+			type: initialValues?.type || "ST",
+			subjectValue: initialValues?.subjectValue || "",
+			typeValue: initialValues?.typeValue || "",
+			validUntil: "2099-12-31 00:00:00",
 		},
 		validationSchema: restrictionDriveSchema,
 		onSubmit: onSubmit,
 	});
-
-	const [getCityList, setGetCityList] = useState<
-		{ label: string; value: string }[]
-	>([]);
+	const [getCityList, setGetCityList] = useState<{ label: string; value: string }[]>([]);
 
 	const { cities, isLoadingCities, isError } = useGetCities(values.state);
 
@@ -62,7 +65,7 @@ export default function AddRestrictionDriverForm({
 		if (!isLoadingCities && !isError && cities) {
 			setGetCityList(handlerGetStates(cities));
 		}
-		setFieldValue("city", "");
+		setFieldValue("typeValue", "");
 	}, [values.state, isLoadingCities, isError, cities]);
 
 	return (
@@ -71,12 +74,12 @@ export default function AddRestrictionDriverForm({
 			<div>
 				<Selecting
 					options={driverList}
-					onChange={(e) => setFieldValue("driver", e?.value)}
+					onChange={(e) => setFieldValue("subjectValue", e?.value)}
 					placeholder="Select Driver"
 				/>
-				{errors.driver && (
+				{errors.subjectValue && (
 					<span className="text-red-500 text-xs leading-3">
-						{errors.driver}
+						{errors.subjectValue}
 					</span>
 				)}
 			</div>
@@ -96,8 +99,8 @@ export default function AddRestrictionDriverForm({
 				<div>
 					<Selecting
 						options={isLoadingCities ? [] : getCityList}
-						isOptionSelected={(e) => e.value === values.city}
-						onChange={(e: any) => setFieldValue("city", e?.value)}
+						isOptionSelected={(e) => e.value === values.typeValue}
+						onChange={(e: any) => {setFieldValue("typeValue", e?.value), setFieldValue("type", "CI")}}
 						placeholder={
 							isLoadingCities
 								? "Loading cities..."
@@ -106,11 +109,6 @@ export default function AddRestrictionDriverForm({
 									: "No cities"
 						}
 					/>
-					{errors.city && (
-						<span className="text-red-500 text-xs leading-3">
-							{errors.city}
-						</span>
-					)}
 				</div>
 			</div>
 			<div className="flex justify-end gap-4">

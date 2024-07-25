@@ -18,6 +18,7 @@ import {
 	useEnableDriver,
 } from "@/hooks/api/useChangeStatusDriver";
 import useSearch from "@/hooks/useSearch";
+import { useAddRestriccion } from "@/hooks/api/useAddRestriccion";
 
 export default function index() {
 	const { search, handleSearch, debounced } = useSearch("drivers");
@@ -38,7 +39,7 @@ export default function index() {
 	const { createDriver, isPending } = useCreateDriver(() => {
 		modal.onClose();
 	});
-
+	const { addRestriccion } = useAddRestriccion(() => { modalRestriction.onClose();})
 	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
 	useEffect(() => {
 		switch (optionSelected) {
@@ -76,13 +77,22 @@ export default function index() {
 		}
 	};
 	const handlerRestriction = (e: AddRestrictionDriverValues) => {
+		addRestriccion(
+			{
+			subject: e.subject,
+			type: e.type,
+			subjectValue: e.subjectValue,
+			typeValue: e.typeValue,
+			validUntil: e.validUntil
+			}
+		);
 		console.log(e);
 		modalRestriction.onClose();
 	};
 
 	const driversList = drivers?.map((e) => ({
 		label: e.firstName.replace(/,/g," "),
-		value: e.id
+		value: e.firstName
 	}));
 
 	return (

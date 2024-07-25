@@ -12,6 +12,7 @@ import {
 	type GetCitiesResponseAPI,
 } from "@/utils/types";
 import axios from "axios";
+import path from "path";
 
 export default class ApiService {
 	// request = async (path: string, method: string, body?: RequestInit) => {
@@ -318,6 +319,31 @@ export default class ApiService {
 				},
 				body: params,
 			});
+		} catch (error) {
+			console.error("Error:", error);
+		}
+	}
+
+	async addRestriccionDriver(addRestriccionBody: {
+		subject:string,
+        type:string,
+        subjectValue:string,
+        typeValue:string,
+        validUntil:string
+	}){
+
+		try {
+			await new Promise((resolve) => setTimeout(resolve, 1000));
+			const response = await this.request<any[]>({
+				path: "/addRestrictions",
+				method: "POST",
+				body: JSON.stringify([addRestriccionBody]), // Convertir el objeto a JSON
+				headers: {
+					'Content-Type': 'application/json' // Asegurarse de que el servidor sepa que estamos enviando JSON
+				}
+			})
+			console.log({mensaje: "Restriccion agregada exitosamente"});
+			return response;
 		} catch (error) {
 			console.error("Error:", error);
 		}

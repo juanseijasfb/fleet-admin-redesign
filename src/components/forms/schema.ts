@@ -31,8 +31,7 @@ export const carrierSchema = Yup.object().shape({
 	carrierName: Yup.string().required("Carrier Name is required"),
 });
 export const restrictionDriveSchema = Yup.object().shape({
-	driver: Yup.string().required("Driver is required"),
-	city: Yup.string().optional(),
+	subjectValue: Yup.string().required("Driver is required"),
 	state: Yup.string().required("State is required"),
 });
 export const addRestrictionBrokerSchema = Yup.object().shape({
