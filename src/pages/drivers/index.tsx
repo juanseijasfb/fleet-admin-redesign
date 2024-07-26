@@ -12,13 +12,15 @@ import UpdateDriverForm, {
 } from "@/components/forms/UpdateDriverForm";
 import type { AddRestrictionDriverValues } from "@/components/forms/AddRestrictionDriverForm";
 import AddRestrictionDriverForm from "@/components/forms/AddRestrictionDriverForm";
-import type { Driver } from "@/utils/types";
+import type { Driver, GetRestriccionResponseAPI } from "@/utils/types";
 import {
 	useDisableDriver,
 	useEnableDriver,
 } from "@/hooks/api/useChangeStatusDriver";
 import useSearch from "@/hooks/useSearch";
-import { useAddRestriccion } from "@/hooks/api/useAddRestriccion";
+import { useAddRestriccion, useRemoveRestriccion } from "@/hooks/api/useChangeRestrictions";
+import { useGetRestriccionDriver } from "@/hooks/api/useGetRestriccionDriver";
+import ShowRestrictions from "@/components/forms/ShowRestriccions";
 
 export default function index() {
 	const { search, handleSearch, debounced } = useSearch("drivers");
@@ -26,6 +28,7 @@ export default function index() {
 	const { isLoading, isError, drivers, refetchDrivers } =
 		useGetDrivers(debounced);
 	const [selectedDriverId, setSelectedDriverId] = useState<number>(0);
+	const [selectedDriverName, setSelectedDriverName] = useState<string>("");
 	const [optionSelected, setOptionSelect] = useState<string>();
 	const [selectedDriver, setSelectedDriver] = useState<UpdateDriverValues[]>(
 		[],
@@ -35,11 +38,14 @@ export default function index() {
 	const [selectedKeys, setSelectedKeys] = React.useState<Selection>(new Set());
 	const modal = useDisclosure();
 	const modalUpdate = useDisclosure();
+	const modalShowRestrictions = useDisclosure();
 	const modalRestriction = useDisclosure();
 	const { createDriver, isPending } = useCreateDriver(() => {
 		modal.onClose();
 	});
 	const { addRestriccion } = useAddRestriccion(() => { modalRestriction.onClose();})
+	const { removeRestriccion } = useRemoveRestriccion(() => { modalShowRestrictions.onClose();});
+	const { restriccionsDrivers, isLoadingRestriccions, refetchRestriccionsDrivers } = useGetRestriccionDriver(selectedDriverName);
 	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
 	useEffect(() => {
 		switch (optionSelected) {
@@ -72,22 +78,14 @@ export default function index() {
 			case "enable":
 				setSelectedDriverId(e[0].id);
 				break;
+			case "showRestrictions":
+				refetchRestriccionsDrivers();
+				setSelectedDriverName(e[0].firstName);
+				modalShowRestrictions.onOpen();
+				break;
 			default:
 				break;
 		}
-	};
-	const handlerRestriction = (e: AddRestrictionDriverValues) => {
-		addRestriccion(
-			{
-			subject: e.subject,
-			type: e.type,
-			subjectValue: e.subjectValue,
-			typeValue: e.typeValue,
-			validUntil: e.validUntil
-			}
-		);
-		console.log(e);
-		modalRestriction.onClose();
 	};
 
 	const driversList = drivers?.map((e) => ({
@@ -156,8 +154,17 @@ export default function index() {
 			>
 				<AddRestrictionDriverForm
 					onClose={modalRestriction.onClose}
-					onSubmit={(e: AddRestrictionDriverValues) => handlerRestriction(e)}
+					onSubmit={(e: AddRestrictionDriverValues) => addRestriccion({subject: e.subject,state: e.state, type: e.type,subjectValue: e.subjectValue,typeValue: e.typeValue,validUntil: e.validUntil})}
 					driverList={driversList ?? []}
+				/>
+			</ModalForm>
+			<ModalForm isOpen={modalShowRestrictions.isOpen} onOpenChange={modalShowRestrictions.onOpenChange}>
+				<ShowRestrictions
+					onClose={modalShowRestrictions.onClose}
+					onSubmit={(e: GetRestriccionResponseAPI) => removeRestriccion({subject: e.Subject,type: e.Type,subjectValue: e.SubjectValue,typeValue: e.TypeValue})}
+					isLoading={isLoadingRestriccions}
+					restriccionDriverList={restriccionsDrivers ?? []}
+					nameDriver={selectedDriverName.replace(/,/g," ")}
 				/>
 			</ModalForm>
 		</LayoutDashboard>

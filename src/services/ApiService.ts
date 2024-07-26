@@ -10,6 +10,7 @@ import {
 	DriverStatus,
 	type BrokerResponseAPI,
 	type GetCitiesResponseAPI,
+	GetRestriccionResponseAPI,
 } from "@/utils/types";
 import axios from "axios";
 import path from "path";
@@ -326,26 +327,77 @@ export default class ApiService {
 
 	async addRestriccionDriver(addRestriccionBody: {
 		subject:string,
+		state?:string,
         type:string,
         subjectValue:string,
         typeValue:string,
-        validUntil:string
+        validUntil?:string
 	}){
-
+		
+		const bodyCustom = {
+			subject: addRestriccionBody.subject,
+			type: addRestriccionBody.type,
+			subjectValue: addRestriccionBody.subjectValue,
+			typeValue: addRestriccionBody.typeValue + addRestriccionBody.state,
+			validUntil: addRestriccionBody.validUntil
+		}
+		
 		try {
 			await new Promise((resolve) => setTimeout(resolve, 1000));
 			const response = await this.request<any[]>({
 				path: "/addRestrictions",
 				method: "POST",
-				body: JSON.stringify([addRestriccionBody]), // Convertir el objeto a JSON
+				body: JSON.stringify([bodyCustom]),
 				headers: {
-					'Content-Type': 'application/json' // Asegurarse de que el servidor sepa que estamos enviando JSON
+					'Content-Type': 'application/json'
 				}
 			})
 			console.log({mensaje: "Restriccion agregada exitosamente"});
 			return response;
 		} catch (error) {
 			console.error("Error:", error);
+		}
+	}
+
+	async getRestriccionDrivers({search} : {search?: string}){ {
+		const params = new URLSearchParams();
+		if (search) {
+			params.append("driver", search);
+		}
+
+		const getRestriccion = await this.request<GetRestriccionResponseAPI[]>({
+			path: `/getRestrictions?${params.toString()}`,
+			method: "GET",
+		});
+		return getRestriccion;
+		}	
+	}
+
+	async removeRestriccionDriver(addRestriccionBody: {
+		subject:string,
+        type:string,
+        subjectValue:string,
+        typeValue:string,
+	}){
+		try{
+			const params = new URLSearchParams({
+				subject:addRestriccionBody.subject,
+				type:addRestriccionBody.type,
+				subjectValue:addRestriccionBody.subjectValue,
+				typeValue:addRestriccionBody.typeValue,
+			});
+	
+			const removeRestriction = await this.request<any[]>({
+				path: `/removeRestriction?${params.toString()}`,
+				method: "GET",
+				body: params,
+			})
+			const response = {mensaje: "Restriccion eliminada exitosamente", response: removeRestriction}
+			console.log(response)
+	
+		} catch (error) {
+			console.error("Error al eliminar la restricción:", error);
+    		throw new Error("No se pudo eliminar la restricción");
 		}
 	}
 }

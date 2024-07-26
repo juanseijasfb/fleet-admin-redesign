@@ -13,7 +13,7 @@ export interface AddRestrictionDriverValues {
 	type: string;
 	subjectValue: string;
 	typeValue: string;
-	validUntil: string;
+	validUntil?: string;
 }
 interface AddRestrictionDriverProps {
 	onClose: () => void;
@@ -34,7 +34,7 @@ const handlerGetStates = (cities: GetCitiesResponseAPI[]) => {
 		})
 		.map((city) => ({
 			label: city.city,
-			value: city.city+":"+city.state_id,
+			value: city.city + ":",
 		}));
 };
 

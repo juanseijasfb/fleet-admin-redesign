@@ -92,6 +92,11 @@ export default function DriverTable({
 							</DropdownTrigger>
 							<DropdownMenu>
 								<DropdownItem
+									onClick={() => onMultipleSelect([driver], "showRestrictions")}
+								>
+									Show restriccions
+								</DropdownItem>
+								<DropdownItem
 									onClick={() => onMultipleSelect([driver], "disable")}
 								>
 									Disable

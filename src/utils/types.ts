@@ -85,3 +85,10 @@ export type GetCitiesResponseAPI = {
 	city: string;
 	state_id: string;
 };
+export type GetRestriccionResponseAPI = {
+	Subject: string;
+	Type: string;
+	SubjectValue: string;
+	TypeValue: string;
+	ValidUntil: string;
+}

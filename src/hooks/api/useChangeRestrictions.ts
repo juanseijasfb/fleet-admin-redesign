@@ -15,3 +15,16 @@ export function useAddRestriccion(cb: () => void) {
   });
   return { addRestriccion: mutate, isPending, isError };
 }
+export function useRemoveRestriccion(cb: () => void) {
+  const { mutate, isPending, isError } = useMutation({
+    onSuccess: () => {
+      cb();
+    },
+    onError: (error) => {},
+    mutationFn: async (values: AddRestrictionDriverValues) => {
+      const api = new ApiService();
+      return api.removeRestriccionDriver(values);
+    },
+  });
+  return { removeRestriccion: mutate, isPending, isError };
+}
