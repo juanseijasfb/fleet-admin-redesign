@@ -21,6 +21,7 @@ import useSearch from "@/hooks/useSearch";
 import { useAddRestriccion, useRemoveRestriccion } from "@/hooks/api/useChangeRestrictions";
 import { useGetRestriccionDriver } from "@/hooks/api/useGetRestriccionDriver";
 import ShowRestrictions from "@/components/forms/ShowRestriccions";
+import toast from 'react-hot-toast';
 
 export default function index() {
 	const { search, handleSearch, debounced } = useSearch("drivers");
@@ -43,8 +44,8 @@ export default function index() {
 	const { createDriver, isPending } = useCreateDriver(() => {
 		modal.onClose();
 	});
-	const { addRestriccion } = useAddRestriccion(() => { modalRestriction.onClose();})
-	const { removeRestriccion } = useRemoveRestriccion(() => { modalShowRestrictions.onClose();});
+	const { addRestriccion,addRPending } = useAddRestriccion(() => { modalRestriction.onClose(); toast.success('Restriction added successfully');})
+	const { removeRestriccion, isPendingRemove } = useRemoveRestriccion(() => { modalShowRestrictions.onClose();toast.success('Restriction removed successfully');});
 	const { restriccionsDrivers, isLoadingRestriccions, refetchRestriccionsDrivers } = useGetRestriccionDriver(selectedDriverName);
 	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
 	useEffect(() => {
@@ -156,13 +157,14 @@ export default function index() {
 					onClose={modalRestriction.onClose}
 					onSubmit={(e: AddRestrictionDriverValues) => addRestriccion({subject: e.subject,state: e.state, type: e.type,subjectValue: e.subjectValue,typeValue: e.typeValue,validUntil: e.validUntil})}
 					driverList={driversList ?? []}
+					isLoading={addRPending}
 				/>
 			</ModalForm>
 			<ModalForm isOpen={modalShowRestrictions.isOpen} onOpenChange={modalShowRestrictions.onOpenChange}>
 				<ShowRestrictions
 					onClose={modalShowRestrictions.onClose}
 					onSubmit={(e: GetRestriccionResponseAPI) => removeRestriccion({subject: e.Subject,type: e.Type,subjectValue: e.SubjectValue,typeValue: e.TypeValue})}
-					isLoading={isLoadingRestriccions}
+					isLoading={isPendingRemove}
 					restriccionDriverList={restriccionsDrivers ?? []}
 					nameDriver={selectedDriverName.replace(/,/g," ")}
 				/>

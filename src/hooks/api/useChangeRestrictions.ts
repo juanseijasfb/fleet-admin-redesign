@@ -13,7 +13,7 @@ export function useAddRestriccion(cb: () => void) {
       return api.addRestriccionDriver(values);
     },
   });
-  return { addRestriccion: mutate, isPending, isError };
+  return { addRestriccion: mutate, addRPending:isPending, isError };
 }
 export function useRemoveRestriccion(cb: () => void) {
   const { mutate, isPending, isError } = useMutation({
@@ -26,5 +26,5 @@ export function useRemoveRestriccion(cb: () => void) {
       return api.removeRestriccionDriver(values);
     },
   });
-  return { removeRestriccion: mutate, isPending, isError };
+  return { removeRestriccion: mutate, isPendingRemove:isPending, isError };
 }
