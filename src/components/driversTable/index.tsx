@@ -60,6 +60,20 @@ export default function DriverTable({
 			const cellValue = driver[columnKey as keyof Driver];
 
 			switch (columnKey) {
+				case "firstName":
+					const extractedFirstName = typeof cellValue === "string" ? cellValue.split(",")[1] || "" : "";
+					return (
+						<span className="w-32 whitespace-nowrap">
+							{extractedFirstName}
+						</span>
+					)
+				case "lastName":
+				const extractedLastName = typeof cellValue === "string" ? cellValue.split(",")[0] || "" : "";
+				return (
+					<span className="w-32 whitespace-nowrap">
+						{extractedLastName}
+					</span>
+				)
 				case "status":
 					return (
 						<Chip
@@ -120,7 +134,7 @@ export default function DriverTable({
 		},
 		[],
 	);
-
+	console.log(rows);
 	return (
 		<div>
 			<Table
