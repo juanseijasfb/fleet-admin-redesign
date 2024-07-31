@@ -7,6 +7,7 @@ const columns = [
 	{ name: "Email", uid: "email" },
 	{ name: "(MC) Carrier", uid: "carrier" },
 	{ name: "Max Load Weight", uid: "weight" },
+	{ name: "Trailer Type", uid: "equipment" },
 	{ name: "Status", uid: "status" },
 	{ name: "", uid: "actions" },
 ];

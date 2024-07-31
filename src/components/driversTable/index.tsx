@@ -134,7 +134,7 @@ export default function DriverTable({
 		},
 		[],
 	);
-	console.log(rows);
+
 	return (
 		<div>
 			<Table
@@ -157,7 +157,7 @@ export default function DriverTable({
 					{(column) => (
 						<TableColumn
 							key={column.uid}
-							align={column.uid === "actions" ? "center" : "start"}
+							align={["actions", "equipment", "status"].includes(column.uid) ? "center" : "start"}
 						>
 							{column.name}
 						</TableColumn>
