@@ -6,13 +6,8 @@ import {
 	TableBody,
 	TableRow,
 	TableCell,
-	User,
 	Chip,
-	Tooltip,
-	getKeyValue,
 	Spinner,
-	Pagination,
-	type Selection,
 } from "@nextui-org/react";
 import {
 	Dropdown,
@@ -25,6 +20,7 @@ import {
 import { type ColumnKeys, columns } from "./data";
 import { BsThreeDotsVertical } from "react-icons/bs";
 import { type Dispatcher, Driver, DriverStatus } from "@/utils/types";
+import InfiniteScroll from "react-infinite-scroll-component";
 
 const statusColorMap: Record<DriverStatus, "success" | "danger"> = {
 	[DriverStatus.Active]: "success",
@@ -32,30 +28,21 @@ const statusColorMap: Record<DriverStatus, "success" | "danger"> = {
 };
 
 interface DispatcherTableProps {
-	rows: Dispatcher[];
+	dispatchers: Dispatcher[];
 	onMultipleSelect: (selected: Dispatcher[]) => void;
 	isLoading: boolean;
+	fetchNextPage: () => void,
+	hasNextPage: boolean,
 }
 
 export default function DispatcherTable({
-	rows,
+	dispatchers,
 	onMultipleSelect,
 	isLoading,
+	fetchNextPage,
+	hasNextPage,
 }: DispatcherTableProps) {
-	const [selectedKeys, setSelectedKeys] = React.useState<Selection>(new Set());
-	const [page, setPage] = React.useState(1);
-	const rowsPerPage = 6;
 
-	const pages = Math.ceil(rows.length / rowsPerPage);
-
-	const items = React.useMemo(() => {
-		const start = (page - 1) * rowsPerPage;
-		const end = start + rowsPerPage;
-
-		return rows.slice(start, end);
-	}, [page, rows]);
-
-	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
 	const renderCell = React.useCallback(
 		(dispatcher: Dispatcher, columnKey: ColumnKeys) => {
 			const cellValue = dispatcher[columnKey as keyof Dispatcher];
@@ -116,22 +103,18 @@ export default function DispatcherTable({
 	);
 
 	return (
-		<div>
+		<InfiniteScroll 
+			dataLength={dispatchers.length}
+			next={() => setTimeout(fetchNextPage, 1000)}
+			hasMore={hasNextPage}
+			loader={
+				<div className="flex justify-center py-10">
+					<Spinner />
+				</div>
+			}
+			style={{ paddingBottom: "10px" }}>
 			<Table
 				aria-label="Example table with custom cells"
-				bottomContent={
-					<div className="flex w-full justify-center">
-						<Pagination
-							isCompact
-							showControls
-							showShadow
-							color="primary"
-							page={page}
-							total={pages}
-							onChange={(page) => setPage(page)}
-						/>
-					</div>
-				}
 			>
 				<TableHeader columns={columns}>
 					{(column) => (
@@ -146,7 +129,7 @@ export default function DispatcherTable({
 				<TableBody
 					loadingState={isLoading ? "loading" : "idle"}
 					loadingContent={<Spinner size="sm" color="primary" />}
-					items={items}
+					items={dispatchers}
 				>
 					{(item) => (
 						<TableRow key={item.id}>
@@ -159,6 +142,6 @@ export default function DispatcherTable({
 					)}
 				</TableBody>
 			</Table>
-		</div>
+		</InfiniteScroll>
 	);
 }

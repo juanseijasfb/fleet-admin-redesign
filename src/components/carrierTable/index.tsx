@@ -6,8 +6,6 @@ import {
 	TableBody,
 	TableRow,
 	TableCell,
-	Pagination,
-	type Selection,
 	Spinner,
 } from "@nextui-org/react";
 import {
@@ -21,31 +19,23 @@ import {
 import { type ColumnKeys, columns } from "./data";
 import { BsThreeDotsVertical } from "react-icons/bs";
 import type { Carrier } from "@/utils/types";
+import InfiniteScroll from "react-infinite-scroll-component";
 
 interface CarrierTableProps {
-	rows: Carrier[];
+	carriers: Carrier[];
 	onMultipleSelect: (selected: Carrier[]) => void;
 	isLoading?: boolean;
+	fetchNextPage: () => void,
+	hasNextPage: boolean,
 }
 
 export default function CarrierTable({
-	rows,
+	carriers,
 	onMultipleSelect,
 	isLoading,
+	fetchNextPage,
+	hasNextPage,
 }: CarrierTableProps) {
-	const [selectedKeys, setSelectedKeys] = React.useState<Selection>(new Set());
-	const [page, setPage] = React.useState(1);
-	const [indice, setIndice] = React.useState(0);
-	const rowsPerPage = 6;
-
-	const pages = Math.ceil(rows.length / rowsPerPage);
-
-	const items = React.useMemo(() => {
-		const start = (page - 1) * rowsPerPage;
-		const end = start + rowsPerPage;
-
-		return rows.slice(start, end);
-	}, [page, rows]);
 
 	const renderCell = React.useCallback(
 		(carrier: Carrier, columnKey: ColumnKeys) => {
@@ -77,22 +67,19 @@ export default function CarrierTable({
 	);
 
 	return (
-		<div>
+		<InfiniteScroll
+			dataLength={carriers.length}
+			next={() => setTimeout(fetchNextPage, 1000)}
+			hasMore={hasNextPage}
+			loader={
+				<div className="flex justify-center py-10">
+					<Spinner />
+				</div>
+			}
+			style={{ paddingBottom: "10px" }}
+		>
 			<Table
 				aria-label="Example table with custom cells"
-				bottomContent={
-					<div className="flex w-full justify-center">
-						<Pagination
-							isCompact
-							showControls
-							showShadow
-							color="primary"
-							page={page}
-							total={pages}
-							onChange={(page) => setPage(page)}
-						/>
-					</div>
-				}
 			>
 				<TableHeader columns={columns}>
 					{(column) => (
@@ -107,7 +94,7 @@ export default function CarrierTable({
 				<TableBody
 					isLoading={isLoading}
 					loadingContent={<Spinner />}
-					items={items}
+					items={carriers}
 				>
 					{(item) => (
 						<TableRow key={item.mcNumber}>
@@ -120,6 +107,6 @@ export default function CarrierTable({
 					)}
 				</TableBody>
 			</Table>
-		</div>
+		</InfiniteScroll>
 	);
 }
