@@ -26,8 +26,7 @@ import toast from 'react-hot-toast';
 export default function index() {
 	const { search, handleSearch, debounced } = useSearch("drivers");
 
-	const { isLoading, isError, drivers, refetchDrivers } =
-		useGetDrivers(debounced);
+	const { driversInfinite, isLoading, fetchNextPage, hasNextPage, refetchDrivers } = useGetDrivers(debounced);
 	const [selectedDriverId, setSelectedDriverId] = useState<number>(0);
 	const [selectedDriverName, setSelectedDriverName] = useState<string>("");
 	const [optionSelected, setOptionSelect] = useState<string>();
@@ -89,6 +88,7 @@ export default function index() {
 		}
 	};
 
+	const drivers = driversInfinite?.pages.flatMap(page => page.data) || [];
 	const driversList = drivers?.map((e) => ({
 		label: e.firstName.replace(/,/g," "),
 		value: e.firstName
@@ -121,10 +121,12 @@ export default function index() {
 			<div className="px-10 max-w-[100%]">
 				<DriverTable
 					isLoading={isLoading}
-					rows={drivers ?? []}
+					drivers={drivers ?? []}
 					onMultipleSelect={(selectedDriver: Driver[], optionSelect: string) =>
 						handlerMultipleSelect(selectedDriver, optionSelect)
 					}
+					fetchNextPage={fetchNextPage}
+					hasNextPage={hasNextPage}
 				/>
 			</div>
 			<ModalForm isOpen={modal.isOpen} onOpenChange={modal.onOpenChange}>

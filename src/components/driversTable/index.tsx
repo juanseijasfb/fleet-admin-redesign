@@ -6,13 +6,10 @@ import {
 	TableBody,
 	TableRow,
 	TableCell,
-	User,
 	Chip,
-	Tooltip,
-	getKeyValue,
-	Pagination,
-	Selection,
 	Spinner,
+	divider,
+	Pagination,
 } from "@nextui-org/react";
 import {
 	Dropdown,
@@ -25,6 +22,7 @@ import {
 import { type ColumnKeys, columns } from "./data";
 import { BsThreeDotsVertical } from "react-icons/bs";
 import { type Driver, DriverStatus } from "@/utils/types";
+import InfiniteScroll from "react-infinite-scroll-component";
 
 const statusColorMap: Record<DriverStatus, "success" | "danger"> = {
 	[DriverStatus.Active]: "success",
@@ -32,29 +30,20 @@ const statusColorMap: Record<DriverStatus, "success" | "danger"> = {
 };
 
 interface DriverTableProps {
-	rows: Driver[];
+	drivers: Driver[];
 	onMultipleSelect: (selectedDriver: Driver[], optionSelect: string) => void;
 	isLoading?: boolean;
+	fetchNextPage: () => void,
+	hasNextPage: boolean,
 }
 
 export default function DriverTable({
-	rows,
+	drivers,
 	onMultipleSelect,
 	isLoading,
+	fetchNextPage,
+	hasNextPage,
 }: DriverTableProps) {
-	const [page, setPage] = React.useState(1);
-	const rowsPerPage = 6;
-
-	const pages = Math.ceil(rows.length / rowsPerPage);
-
-	const items = React.useMemo(() => {
-		const start = (page - 1) * rowsPerPage;
-		const end = start + rowsPerPage;
-
-		return rows.slice(start, end);
-	}, [page, rows]);
-
-	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
 	const renderCell = React.useCallback(
 		(driver: Driver, columnKey: ColumnKeys) => {
 			const cellValue = driver[columnKey as keyof Driver];
@@ -136,49 +125,46 @@ export default function DriverTable({
 	);
 
 	return (
-		<div>
-			<Table
-				aria-label="Example table with custom cells"
-				bottomContent={
-					<div className="flex w-full justify-center">
-						<Pagination
-							isCompact
-							showControls
-							showShadow
-							color="primary"
-							page={page}
-							total={pages}
-							onChange={(page) => setPage(page)}
-						/>
+			<InfiniteScroll
+				dataLength={drivers.length}
+				next={() => setTimeout(fetchNextPage, 1000)}
+				hasMore={hasNextPage}
+				loader={
+					<div className="flex justify-center py-10">
+						<Spinner />
 					</div>
 				}
+				style={{ paddingBottom: "10px" }}
 			>
-				<TableHeader columns={columns}>
-					{(column) => (
-						<TableColumn
-							key={column.uid}
-							align={["actions", "equipment", "status"].includes(column.uid) ? "center" : "start"}
-						>
-							{column.name}
-						</TableColumn>
-					)}
-				</TableHeader>
-				<TableBody
-					loadingState={isLoading ? "loading" : "idle"}
-					loadingContent={<Spinner />}
-					items={items}
+				<Table
+					aria-label="Example table with custom cells"
 				>
-					{(item) => (
-						<TableRow key={item.id}>
-							{(columnKey) => (
-								<TableCell>
-									{renderCell(item, columnKey as ColumnKeys)}
-								</TableCell>
-							)}
-						</TableRow>
-					)}
-				</TableBody>
-			</Table>
-		</div>
+					<TableHeader columns={columns}>
+						{(column) => (
+							<TableColumn
+								key={column.uid}
+								align={["actions", "equipment", "status"].includes(column.uid) ? "center" : "start"}
+							>
+								{column.name}
+							</TableColumn>
+						)}
+					</TableHeader>
+					<TableBody
+						loadingState={isLoading ? "loading" : "idle"}
+						loadingContent={<Spinner />}
+						items={drivers}
+					>
+						{(item) => (
+							<TableRow key={item.id}>
+								{(columnKey) => (
+									<TableCell>
+										{renderCell(item, columnKey as ColumnKeys)}
+									</TableCell>
+								)}
+							</TableRow>
+						)}
+					</TableBody>
+				</Table>
+			</InfiniteScroll>
 	);
 }

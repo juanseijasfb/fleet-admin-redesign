@@ -10,6 +10,7 @@ import {
 	useGetUnassignedDriver,
 } from "@/hooks/api/useGetAssignedDriver";
 import useGetDispatchers from "@/hooks/api/useGetDispatcher";
+import useGetDriversInfinite from "@/hooks/api/useGetDrivers";
 import useSearch from "@/hooks/useSearch";
 import { type Dispatcher, DriverUnassignedResponseAPI } from "@/utils/types";
 import { useDisclosure } from "@nextui-org/react";
@@ -18,15 +19,13 @@ import { useState } from "react";
 export default function index() {
 	const [selectedDriverEmail, setSelectedDriverEmail] = useState("");
 	const { search, handleSearch, debounced } = useSearch("dispatcher");
-	const { dispatchers, isLoading } = useGetDispatchers({
+	const { dispatchersInfinite, isLoading, fetchNextPage, hasNextPage } = useGetDispatchers({
 		search: debounced,
 	});
 
 	const [dispatchName, setDispatchName] = useState("");
-	const { assignedDriver, isLoadingAssigned } =
-		useGetAssignedDriver(selectedDriverEmail);
-	const { unassignedDriver, isLoadingUnassigned } =
-		useGetUnassignedDriver(selectedDriverEmail);
+	const { assignedDriver, isLoadingAssigned } = useGetAssignedDriver(selectedDriverEmail);
+	const { unassignedDriver, isLoadingUnassigned } = useGetUnassignedDriver(selectedDriverEmail);
 	const modal = useDisclosure();
 	const modalAssDriver = useDisclosure();
 	const { createDispatch, isPending } = useCreateDispatch(() => {
@@ -42,7 +41,8 @@ export default function index() {
 	const handleAssignedDriverSubmit = (values: string[]) => {
 		console.log(values);
 	};
-
+	const dispatchers = dispatchersInfinite?.pages.flatMap(page => page.data) || [];
+	console.log(unassignedDriver)
 	return (
 		<LayoutDashboard>
 			<HeaderDashboard
@@ -59,8 +59,10 @@ export default function index() {
 				{
 					<DispatcherTable
 						isLoading={isLoading}
-						rows={dispatchers ?? []}
+						dispatchers={dispatchers ?? []}
 						onMultipleSelect={(e: Dispatcher[]) => handleAction(e)}
+						fetchNextPage={fetchNextPage}
+						hasNextPage={hasNextPage}
 					/>
 				}
 			</div>

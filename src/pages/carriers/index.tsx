@@ -15,7 +15,7 @@ export default function index() {
 	const { listBroker, isLoadingBroker } = useGetBrokerList();
 
 	const { search, debounced, handleSearch } = useSearch("carrier");
-	const { carriers, isLoading } = useGetCarriers(debounced);
+	const { carriersInfinite, isLoading, fetchNextPage, hasNextPage } = useGetCarriers(debounced);
 	const modal = useDisclosure();
 	const modalRestriction = useDisclosure();
 	const [companyName, setCompanyName] = useState("");
@@ -30,6 +30,7 @@ export default function index() {
 		console.log(values);
 		modalRestriction.onClose();
 	};
+	const carriers = carriersInfinite?.pages.flatMap(page => page.data) || [];
 	return (
 		<LayoutDashboard>
 			<HeaderDashboard
@@ -48,8 +49,10 @@ export default function index() {
 				{
 					<CarrierTable
 						isLoading={isLoading}
-						rows={carriers ?? []}
+						carriers={carriers ?? []}
 						onMultipleSelect={(e) => handlerModalRestriction(e)}
+						fetchNextPage={fetchNextPage}
+						hasNextPage={hasNextPage}
 					/>
 				}
 			</div>
