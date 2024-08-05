@@ -14,7 +14,8 @@ import useGetDriversInfinite from "@/hooks/api/useGetDrivers";
 import useSearch from "@/hooks/useSearch";
 import { type Dispatcher, DriverUnassignedResponseAPI } from "@/utils/types";
 import { useDisclosure } from "@nextui-org/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 
 export default function index() {
 	const [selectedDriverEmail, setSelectedDriverEmail] = useState("");
@@ -24,7 +25,7 @@ export default function index() {
 	});
 
 	const [dispatchName, setDispatchName] = useState("");
-	const { assignedDriver, isLoadingAssigned } = useGetAssignedDriver(selectedDriverEmail);
+	const { assignedDriver, isLoadingAssigned, refetchAssignedDriver } = useGetAssignedDriver(selectedDriverEmail);
 	const { unassignedDriver, isLoadingUnassigned } = useGetUnassignedDriver(selectedDriverEmail);
 	const modal = useDisclosure();
 	const modalAssDriver = useDisclosure();
@@ -38,11 +39,16 @@ export default function index() {
 		modalAssDriver.onOpen();
 	};
 
+  useEffect(() => {
+    refetchAssignedDriver();
+  }, [setDispatchName,selectedDriverEmail]);
 	const handleAssignedDriverSubmit = (values: string[]) => {
 		console.log(values);
+    modalAssDriver.onClose();
+    toast.success('Driver assigned successfully');
 	};
 	const dispatchers = dispatchersInfinite?.pages.flatMap(page => page.data) || [];
-	console.log(unassignedDriver)
+  
 	return (
 		<LayoutDashboard>
 			<HeaderDashboard
