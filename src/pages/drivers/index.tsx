@@ -43,8 +43,8 @@ export default function index() {
 	const { createDriver, isPending } = useCreateDriver(() => {
 		modal.onClose();
 	});
-	const { addRestriccion,addRPending } = useAddRestriccion(() => { modalRestriction.onClose(); toast.success('Restriction added successfully');})
-	const { removeRestriccion, isPendingRemove } = useRemoveRestriccion(() => { modalShowRestrictions.onClose();toast.success('Restriction removed successfully');});
+	const { addRestriccion, addRPending } = useAddRestriccion(() => { modalRestriction.onClose(); toast.success('Restriction added successfully');}, "driver")
+	const { removeRestriccion, isPendingRemove } = useRemoveRestriccion(() => { modalShowRestrictions.onClose();toast.success('Restriction removed successfully')});
 	const { restriccionsDrivers, isLoadingRestriccions, refetchRestriccionsDrivers } = useGetRestriccionDriver(selectedDriverName);
 	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
 	useEffect(() => {
