@@ -324,7 +324,29 @@ export default class ApiService {
 			console.error("Error:", error);
 		}
 	}
+	async activeDisableDispatch(disableDispatchBody: {
+		dispatcherId: number;
+		disable: boolean;
+	}) {
+		const params = new URLSearchParams();
+		params.append("dispatchers", disableDispatchBody.dispatcherId.toString());
 
+		try {
+			const url = disableDispatchBody.disable
+				? "/disableDispatchers"
+				: "/enableDispatchers";
+			const response = await this.request<any[]>({
+				path: `${url}`,
+				method: "POST",
+				headers: {
+					"Content-Type": "application/x-www-form-urlencoded",
+				},
+				body: params,
+			});
+		} catch (error) {
+			console.error("Error:", error);
+		}
+	}
 	async addRestriccionDriver(addRestriccionBody: {
 		subject:string,
 		state?:string,

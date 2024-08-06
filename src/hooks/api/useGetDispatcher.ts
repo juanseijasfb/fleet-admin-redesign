@@ -19,5 +19,8 @@ export default function useGetDispatchers({ search }: { search?: string }) {
         getNextPageParam: (lastPage) => lastPage.nextPage,
         initialPageParam: 0,
     });
-    return { dispatchersInfinite: data, isLoading, isError, fetchNextPage, hasNextPage };
+    const refetchDispatchers = () => {
+        refetch();
+    }
+    return { dispatchersInfinite: data, isLoading, isError, fetchNextPage, hasNextPage, refetchDispatchers };
 }
