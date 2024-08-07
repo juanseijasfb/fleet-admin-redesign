@@ -21,12 +21,14 @@ interface AddDriverFormProps {
 	initialValues?: AddDriverValues;
 	isLoading?: boolean;
 	type: "create" | "edit";
+	driverEmail: string[];
 }
 export default function AddDriverForm({
 	onSubmit,
 	initialValues,
 	isLoading,
 	type = "create",
+	driverEmail
 }: AddDriverFormProps) {
 	const { values, errors, handleBlur, handleChange, handleSubmit } = useFormik({
 		initialValues: {
@@ -38,7 +40,7 @@ export default function AddDriverForm({
 			maxLoadWeight: initialValues?.maxLoadWeight || "99999",
 			trailerType: initialValues?.trailerType || "",
 		},
-		validationSchema: driverSchema,
+		validationSchema: driverSchema(driverEmail),
 		onSubmit: onSubmit,
 	});
 

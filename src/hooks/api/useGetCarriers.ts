@@ -1,7 +1,15 @@
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import ApiService from "@/services/ApiService";
 
 export default function useGetCarriers(search: string) {
+    const { data: carrierAll, isLoading: isLoadingAll, isError: isErrorAll } = useQuery({
+        queryKey: ["carrierTotal", search],
+        queryFn: async () => {
+          const api = new ApiService();
+          return await api.getCarriers({ search });
+        }
+    });
+
 	const { data, isLoading, isError, fetchNextPage, hasNextPage, refetch } = useInfiniteQuery({
 		queryKey: ["carriers", search],
 		queryFn: async ({pageParam = 0}) => {
@@ -19,5 +27,5 @@ export default function useGetCarriers(search: string) {
         getNextPageParam: (lastPage) => lastPage.nextPage,
         initialPageParam: 0,
     });
-    return { carriersInfinite: data, isLoading, isError, fetchNextPage, hasNextPage };
+    return { carriersInfinite: data, carrierAll, isLoading, isError, fetchNextPage, hasNextPage };
 }

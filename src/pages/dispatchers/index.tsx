@@ -20,7 +20,7 @@ import toast from "react-hot-toast";
 export default function index() {
 	const [selectedDriverEmail, setSelectedDriverEmail] = useState("");
 	const { search, handleSearch, debounced } = useSearch("dispatcher");
-	const { dispatchersInfinite, isLoading, fetchNextPage, hasNextPage, refetchDispatchers } = useGetDispatchers({
+	const { dispatchersInfinite, dispatchersAll, isLoading, fetchNextPage, hasNextPage, refetchDispatchers } = useGetDispatchers({
 		search: debounced,
 	});
 	const [selectedDispatchId, setSelectedDispatchId] = useState<number>(0);
@@ -107,6 +107,7 @@ export default function index() {
 			<ModalForm isOpen={modal.isOpen} onOpenChange={modal.onOpenChange}>
 				<AddDispatcherForm
 					isLoading={isPending}
+					dispatchersEmail={dispatchersAll?.map((d) => d.email) ?? []}
 					onSubmit={(values) => {
 						createDispatch(values);
 					}}

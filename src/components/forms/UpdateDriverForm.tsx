@@ -21,12 +21,14 @@ interface UpdateDriverFormProps {
 	onSubmit: (values: UpdateDriverValues) => void;
 	initialValues?: UpdateDriverValues;
 	isLoading?: boolean;
+	driverEmail: string[];
 }
 export default function UpdateDriverForm({
 	defaultValues,
 	onSubmit,
 	initialValues,
 	isLoading,
+	driverEmail
 }: UpdateDriverFormProps) {
 	const { values, errors, handleBlur, handleChange, handleSubmit } = useFormik({
 		initialValues: {
@@ -38,7 +40,7 @@ export default function UpdateDriverForm({
 			weight: defaultValues[0].weight || "",
 			equipment: defaultValues[0].equipment || "",
 		},
-		validationSchema: driverUpdateSchema,
+		validationSchema: driverUpdateSchema(driverEmail, defaultValues[0].email),
 		onSubmit: onSubmit,
 	});
 	return (

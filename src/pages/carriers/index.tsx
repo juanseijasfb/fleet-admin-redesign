@@ -17,7 +17,7 @@ export default function index() {
 	const { listBroker, isLoadingBroker } = useGetBrokerList();
 
 	const { search, debounced, handleSearch } = useSearch("carrier");
-	const { carriersInfinite, isLoading, fetchNextPage, hasNextPage } = useGetCarriers(debounced);
+	const { carriersInfinite, carrierAll, isLoading, fetchNextPage, hasNextPage } = useGetCarriers(debounced);
 	const { addRestriccion, addRPending } = useAddRestriccion(() => { modalRestriction.onClose(); toast.success('Restriction added successfully');}, "carrier");
 	const modal = useDisclosure();
 	const modalRestriction = useDisclosure();
@@ -59,6 +59,7 @@ export default function index() {
 				<AddCarrierForm
 					isLoading={isPending}
 					onSubmit={(values) => createCarrier(values)}
+					carrierMc={carrierAll?.map((c) => c.mcNumber.toString()) ?? []}
 				/>
 			</ModalForm>
 			<ModalForm
