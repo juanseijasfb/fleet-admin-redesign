@@ -1,7 +1,15 @@
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import ApiService from "@/services/ApiService";
 
 export default function useGetDispatchers({ search }: { search?: string }) {
+    const { data: dispatchersAll, isLoading: isLoadingAll, isError: isErrorAll } = useQuery({
+        queryKey: ["dispatcherTotal", search],
+        queryFn: async () => {
+          const api = new ApiService();
+          return await api.getDispatcher({ search });
+        }
+    });
+
 	const { data, isLoading, isError, fetchNextPage, hasNextPage, refetch } = useInfiniteQuery({
 		queryKey: ["dispatchers", search],
 		queryFn: async ({ pageParam = 0 }) => {
@@ -19,5 +27,8 @@ export default function useGetDispatchers({ search }: { search?: string }) {
         getNextPageParam: (lastPage) => lastPage.nextPage,
         initialPageParam: 0,
     });
-    return { dispatchersInfinite: data, isLoading, isError, fetchNextPage, hasNextPage };
+    const refetchDispatchers = () => {
+        refetch();
+    }
+    return { dispatchersInfinite: data, dispatchersAll, isLoading, isError, fetchNextPage, hasNextPage, refetchDispatchers };
 }

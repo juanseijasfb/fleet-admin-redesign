@@ -26,7 +26,7 @@ import toast from 'react-hot-toast';
 export default function index() {
 	const { search, handleSearch, debounced } = useSearch("drivers");
 
-	const { driversInfinite, isLoading, fetchNextPage, hasNextPage, refetchDrivers } = useGetDrivers(debounced);
+	const { driversInfinite, driversAll, isLoading, fetchNextPage, hasNextPage, refetchDrivers } = useGetDrivers(debounced);
 	const [selectedDriverId, setSelectedDriverId] = useState<number>(0);
 	const [selectedDriverName, setSelectedDriverName] = useState<string>("");
 	const [optionSelected, setOptionSelect] = useState<string>();
@@ -43,8 +43,8 @@ export default function index() {
 	const { createDriver, isPending } = useCreateDriver(() => {
 		modal.onClose();
 	});
-	const { addRestriccion,addRPending } = useAddRestriccion(() => { modalRestriction.onClose(); toast.success('Restriction added successfully');})
-	const { removeRestriccion, isPendingRemove } = useRemoveRestriccion(() => { modalShowRestrictions.onClose();toast.success('Restriction removed successfully');});
+	const { addRestriccion, addRPending } = useAddRestriccion(() => { modalRestriction.onClose(); toast.success('Restriction added successfully');}, "driver")
+	const { removeRestriccion, isPendingRemove } = useRemoveRestriccion(() => { modalShowRestrictions.onClose();toast.success('Restriction removed successfully')});
 	const { restriccionsDrivers, isLoadingRestriccions, refetchRestriccionsDrivers } = useGetRestriccionDriver(selectedDriverName);
 	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
 	useEffect(() => {
@@ -136,6 +136,7 @@ export default function index() {
 					onSubmit={(values) => {
 						createDriver(values);
 					}}
+					driverEmail={driversAll?.map((d) => d.email) ?? []}
 				/>
 			</ModalForm>
 			<ModalForm
@@ -149,6 +150,7 @@ export default function index() {
 						console.log(values);
 						modalUpdate.onClose();
 					}}
+					driverEmail={driversAll?.map((d) => d.email) ?? []}
 				/>
 			</ModalForm>
 			<ModalForm

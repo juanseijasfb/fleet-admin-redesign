@@ -29,7 +29,7 @@ const statusColorMap: Record<DriverStatus, "success" | "danger"> = {
 
 interface DispatcherTableProps {
 	dispatchers: Dispatcher[];
-	onMultipleSelect: (selected: Dispatcher[]) => void;
+	onMultipleSelect: (selected: Dispatcher[], optionSelect: string) => void;
 	isLoading: boolean;
 	fetchNextPage: () => void,
 	hasNextPage: boolean,
@@ -87,7 +87,13 @@ export default function DispatcherTable({
 								</Button>
 							</DropdownTrigger>
 							<DropdownMenu>
-								<DropdownItem onClick={() => onMultipleSelect([dispatcher])}>
+								<DropdownItem onClick={() => onMultipleSelect([dispatcher], "enable")}>
+									Enable
+								</DropdownItem>
+								<DropdownItem onClick={() => onMultipleSelect([dispatcher], "disable")}>
+									Disable
+								</DropdownItem>
+								<DropdownItem onClick={() => onMultipleSelect([dispatcher], "assignDriver")}>
 									Assign driver
 								</DropdownItem>
 								{/* <DropdownItem>Edit</DropdownItem>

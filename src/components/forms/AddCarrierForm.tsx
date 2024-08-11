@@ -12,18 +12,20 @@ interface AddCarrierFormProps {
   onSubmit: (values: AddCarrierValues) => void;
   initialValues?: AddCarrierValues;
   isLoading?: boolean;
+  carrierMc: string[];
 }
 export default function AddCarrierForm({
   onSubmit,
   initialValues,
   isLoading,
+  carrierMc
 }: AddCarrierFormProps) {
   const { values, errors, handleBlur, handleChange, handleSubmit } = useFormik({
     initialValues: {
       mc: initialValues?.mc || "",
       carrierName: initialValues?.carrierName || "",
     },
-    validationSchema: carrierSchema,
+    validationSchema: carrierSchema(carrierMc),
     onSubmit: onSubmit,
   });
 

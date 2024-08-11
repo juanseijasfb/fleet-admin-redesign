@@ -7,28 +7,27 @@ import CarrierTable from "@/components/carrierTable";
 import useGetCarriers from "@/hooks/api/useGetCarriers";
 import { Button, useDisclosure } from "@nextui-org/react";
 import React, { useState } from "react";
-import AddRestrictionCarrier from "@/components/forms/AddRestrictionCarrier";
+import AddRestrictionCarrier, { CarrierTableValues } from "@/components/forms/AddRestrictionCarrier";
 import useSearch from "@/hooks/useSearch";
 import { useGetBrokerList } from "@/hooks/api/useGetBroker";
+import toast from "react-hot-toast";
+import { useAddRestriccion } from "@/hooks/api/useChangeRestrictions";
 
 export default function index() {
 	const { listBroker, isLoadingBroker } = useGetBrokerList();
 
 	const { search, debounced, handleSearch } = useSearch("carrier");
-	const { carriersInfinite, isLoading, fetchNextPage, hasNextPage } = useGetCarriers(debounced);
+	const { carriersInfinite, carrierAll, isLoading, fetchNextPage, hasNextPage } = useGetCarriers(debounced);
+	const { addRestriccion, addRPending } = useAddRestriccion(() => { modalRestriction.onClose(); toast.success('Restriction added successfully');}, "carrier");
 	const modal = useDisclosure();
 	const modalRestriction = useDisclosure();
-	const [companyName, setCompanyName] = useState("");
+	const [carrierSelected, setCarrierSelected] = useState<CarrierTableValues>();
 	const { createCarrier, isPending } = useCreateCarrier(() => {
 		modal.onClose();
 	});
 	const handlerModalRestriction = (e: any) => {
-		setCompanyName(e[0].carrier);
+		setCarrierSelected(e[0]);
 		modalRestriction.onOpen();
-	};
-	const handleSubmit = (values: any) => {
-		console.log(values);
-		modalRestriction.onClose();
 	};
 	const carriers = carriersInfinite?.pages.flatMap(page => page.data) || [];
 	return (
@@ -60,6 +59,7 @@ export default function index() {
 				<AddCarrierForm
 					isLoading={isPending}
 					onSubmit={(values) => createCarrier(values)}
+					carrierMc={carrierAll?.map((c) => c.mcNumber.toString()) ?? []}
 				/>
 			</ModalForm>
 			<ModalForm
@@ -68,9 +68,9 @@ export default function index() {
 			>
 				<AddRestrictionCarrier
 					onClose={() => modalRestriction.onClose()}
-					isLoading={isLoadingBroker}
-					onSubmit={(values) => handleSubmit(values)}
-					companyName={companyName}
+					isLoading={addRPending}
+					onSubmit={(e) => addRestriccion({subject: e.subject, type: e.type,subjectValue: e.subjectValue,typeValue: e.typeValue,validUntil: e.validUntil})}
+					carrierSelected={carrierSelected}
 					listBroker={listBroker}
 				/>
 			</ModalForm>

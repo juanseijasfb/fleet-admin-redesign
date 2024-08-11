@@ -16,11 +16,13 @@ interface AddDispatchFormProps {
   onSubmit: (values: AddDispatchValues) => void;
   initialValues?: AddDispatchValues;
   isLoading?: boolean;
+  dispatchersEmail: string[];
 }
 export default function AddDispatcherForm({
   onSubmit,
   initialValues,
   isLoading,
+  dispatchersEmail
 }: AddDispatchFormProps) {
   const { values, errors, handleBlur, handleChange, handleSubmit } = useFormik({
     initialValues: {
@@ -30,7 +32,7 @@ export default function AddDispatcherForm({
       role: initialValues?.role || "",
       enabled: initialValues?.enabled || true,
     },
-    validationSchema: dispatcherSchema,
+    validationSchema: dispatcherSchema(dispatchersEmail),
     onSubmit: onSubmit,
   });
 

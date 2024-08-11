@@ -282,7 +282,7 @@ export default class ApiService {
 
 	async getBrokerList() {
 		const brokers = await this.request<BrokerResponseAPI[]>({
-			path: "/getBrokerList?MCNumbers=131,76,138",
+			path: "/getBrokerList?MCNumbers=131,76,138,7,1",
 			method: "GET",
 		});
 		return brokers;
@@ -324,7 +324,29 @@ export default class ApiService {
 			console.error("Error:", error);
 		}
 	}
+	async activeDisableDispatch(disableDispatchBody: {
+		dispatcherId: number;
+		disable: boolean;
+	}) {
+		const params = new URLSearchParams();
+		params.append("dispatchers", disableDispatchBody.dispatcherId.toString());
 
+		try {
+			const url = disableDispatchBody.disable
+				? "/disableDispatchers"
+				: "/enableDispatchers";
+			const response = await this.request<any[]>({
+				path: `${url}`,
+				method: "POST",
+				headers: {
+					"Content-Type": "application/x-www-form-urlencoded",
+				},
+				body: params,
+			});
+		} catch (error) {
+			console.error("Error:", error);
+		}
+	}
 	async addRestriccionDriver(addRestriccionBody: {
 		subject:string,
 		state?:string,
@@ -358,7 +380,31 @@ export default class ApiService {
 			console.error("Error:", error);
 		}
 	}
-
+	async addRestriccionCarrier(addRestriccionCarrierBody: {
+		subject: string;
+		state?: string;
+		type: string;
+		subjectValue: string;
+		typeValue: string;
+		validUntil?: string;
+	}){
+		
+		try {
+			await new Promise((resolve) => setTimeout(resolve, 1000));
+			const response = await this.request<any[]>({
+				path: "/addRestriction",
+				method: "GET",
+				body: JSON.stringify(addRestriccionCarrierBody),
+				headers: {
+					'Content-Type': 'application/json'
+				}
+			})
+			console.log({mensaje: "Restriccion agregada exitosamente"});
+			return response;
+		} catch (error) {
+			console.error("Error:", error);
+		}
+	}
 	async getRestriccionDrivers({search} : {search?: string}){ {
 		const params = new URLSearchParams();
 		if (search) {

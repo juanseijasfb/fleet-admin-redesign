@@ -2,7 +2,7 @@ import ApiService from "@/services/ApiService";
 import { useQuery } from "@tanstack/react-query";
 
 export function useGetAssignedDriver(email: string) {
-  const { data, isLoading, isError } = useQuery({
+  const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ["dispacher", email],
     queryFn: async () => {
       const api = new ApiService();
@@ -10,8 +10,10 @@ export function useGetAssignedDriver(email: string) {
     },
     enabled: !!email,
   });
-
-  return { assignedDriver: data, isLoadingAssigned: isLoading, isError };
+  const refetchAssignedDriver = async () => {
+    return refetch();
+  }
+  return { assignedDriver: data, isLoadingAssigned: isLoading, isError, refetchAssignedDriver };
 }
 export function useGetUnassignedDriver(email: string) {
   const { data, isLoading, isError } = useQuery({

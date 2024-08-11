@@ -3,31 +3,43 @@ import Select from "../Select";
 import { BrokerResponseAPI } from "@/utils/types";
 import { useFormik } from "formik";
 import { addRestrictionBrokerSchema } from "./schema";
+import { Inter_Tight } from "next/font/google";
 
-export interface BrokerValues {
-  MCNumber: string;
+export interface AddRestrictionCarrierValues {
+  subject: string;
+	type: string;
+	subjectValue: string;
+	typeValue: string;
+	validUntil: string;
 }
-
+export interface CarrierTableValues {
+  carrier: string;
+  mcNumber: number;
+}
 type Props = {
   onClose: () => void;
   isLoading?: boolean;
-  onSubmit: (values: { mcNumber: string }) => void;
-  companyName: string;
+  onSubmit: (values: AddRestrictionCarrierValues) => void;
+  carrierSelected?: CarrierTableValues;
   listBroker?: BrokerResponseAPI[];
-  initialValues?: BrokerValues;
+  initialValues?: AddRestrictionCarrierValues;
 };
 
 export default function AddRestrictionCarrier({
   onClose,
   onSubmit,
   isLoading,
-  companyName,
+  carrierSelected,
   listBroker,
   initialValues,
 }: Props) {
   const { values, errors, handleSubmit, setFieldValue } = useFormik({
     initialValues: {
-      mcNumber: initialValues?.MCNumber || "",
+      subject: "C",
+      type: "B",
+      subjectValue: carrierSelected?.mcNumber.toString() || "",
+      typeValue: initialValues?.typeValue || "",
+      validUntil: "2099-12-31%2000:00:00"
     },
     validationSchema: addRestrictionBrokerSchema,
     onSubmit: onSubmit,
@@ -35,7 +47,7 @@ export default function AddRestrictionCarrier({
 
   return (
     <div className="flex flex-col gap-8 py-4">
-      <h3 className="font-bold pt-2 ">Restriction to Carrier {companyName}</h3>
+      <h3 className="font-bold pt-2 ">Restriction to Carrier {carrierSelected?.carrier}</h3>
       <div>
         <Select
           size="lg"
@@ -45,12 +57,12 @@ export default function AddRestrictionCarrier({
               value: broker.MCNumber,
             })) ?? []
           }
-          onChange={(e: any) => setFieldValue("mcNumber", e.target.value)}
+          onChange={(e: any) => setFieldValue("typeValue", e.target.value)}
           placeholder="Broker Selector"
         />
-        {errors.mcNumber && (
+        {errors.typeValue && (
           <span className="text-red-500 text-xs leading-3">
-            {errors.mcNumber}
+            {errors.typeValue}
           </span>
         )}
       </div>

@@ -4,45 +4,83 @@ import ModalForm from "@/components/ModalForm";
 import DispatcherTable from "@/components/dispatcherTable";
 import AddDispatcherForm from "@/components/forms/AddDispatchForm";
 import AssignedDriver from "@/components/forms/AssignedDriver";
+import { useDisableDispatch, useEnableDispatch } from "@/hooks/api/useChangeStatusDispatch";
 import useCreateDispatch from "@/hooks/api/useCreateDispatch";
 import {
 	useGetAssignedDriver,
 	useGetUnassignedDriver,
 } from "@/hooks/api/useGetAssignedDriver";
 import useGetDispatchers from "@/hooks/api/useGetDispatcher";
-import useGetDriversInfinite from "@/hooks/api/useGetDrivers";
 import useSearch from "@/hooks/useSearch";
 import { type Dispatcher, DriverUnassignedResponseAPI } from "@/utils/types";
 import { useDisclosure } from "@nextui-org/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 
 export default function index() {
 	const [selectedDriverEmail, setSelectedDriverEmail] = useState("");
 	const { search, handleSearch, debounced } = useSearch("dispatcher");
-	const { dispatchersInfinite, isLoading, fetchNextPage, hasNextPage } = useGetDispatchers({
+	const { dispatchersInfinite, dispatchersAll, isLoading, fetchNextPage, hasNextPage, refetchDispatchers } = useGetDispatchers({
 		search: debounced,
 	});
-
+	const [selectedDispatchId, setSelectedDispatchId] = useState<number>(0);
 	const [dispatchName, setDispatchName] = useState("");
-	const { assignedDriver, isLoadingAssigned } = useGetAssignedDriver(selectedDriverEmail);
+	const { assignedDriver, isLoadingAssigned, refetchAssignedDriver } = useGetAssignedDriver(selectedDriverEmail);
 	const { unassignedDriver, isLoadingUnassigned } = useGetUnassignedDriver(selectedDriverEmail);
+	const { disableDispatch } = useDisableDispatch(selectedDispatchId);
+	const { enableDispatch } = useEnableDispatch(selectedDispatchId);
 	const modal = useDisclosure();
 	const modalAssDriver = useDisclosure();
+	const [optionSelected, setOptionSelect] = useState<string>();
 	const { createDispatch, isPending } = useCreateDispatch(() => {
 		modal.onClose();
 	});
 
-	const handleAction = (dispatcher: Dispatcher[]) => {
-		setDispatchName(`${dispatcher[0].firstName} ${dispatcher[0].lastName}`);
-		setSelectedDriverEmail(dispatcher[0].email);
-		modalAssDriver.onOpen();
+	const handleAction = (dispatcher: Dispatcher[], optionSelect: string) => {
+		setOptionSelect(optionSelect);
+		switch (optionSelect) {
+			case "disable":
+				setSelectedDispatchId(dispatcher.map((d) => d.id)[0]);
+				break;
+			case "enable":
+				setSelectedDispatchId(dispatcher.map((d) => d.id)[0]);
+				break;
+			case "assignDriver":
+				setDispatchName(`${dispatcher[0].firstName} ${dispatcher[0].lastName}`);
+				setSelectedDriverEmail(dispatcher[0].email);
+				modalAssDriver.onOpen();
+				break;
+			default:
+				break;
+		}
 	};
-
+	useEffect(() => {
+		switch (optionSelected) {
+			case "disable":
+				disableDispatch();
+				refetchDispatchers();
+				break;
+			case "enable":
+				enableDispatch();
+				refetchDispatchers();
+				break;
+			default:
+				refetchDispatchers();
+				break;
+		}
+		setOptionSelect("");
+		setSelectedDispatchId(0);
+	}, [optionSelected, selectedDispatchId]);
+	useEffect(() => {
+		refetchAssignedDriver();
+	}, [setDispatchName,selectedDriverEmail]);
 	const handleAssignedDriverSubmit = (values: string[]) => {
 		console.log(values);
+    modalAssDriver.onClose();
+    toast.success('Driver assigned successfully');
 	};
 	const dispatchers = dispatchersInfinite?.pages.flatMap(page => page.data) || [];
-	console.log(unassignedDriver)
+  
 	return (
 		<LayoutDashboard>
 			<HeaderDashboard
@@ -60,7 +98,7 @@ export default function index() {
 					<DispatcherTable
 						isLoading={isLoading}
 						dispatchers={dispatchers ?? []}
-						onMultipleSelect={(e: Dispatcher[]) => handleAction(e)}
+						onMultipleSelect={(e: Dispatcher[], optionSelect:string) => handleAction(e, optionSelect)}
 						fetchNextPage={fetchNextPage}
 						hasNextPage={hasNextPage}
 					/>
@@ -69,6 +107,7 @@ export default function index() {
 			<ModalForm isOpen={modal.isOpen} onOpenChange={modal.onOpenChange}>
 				<AddDispatcherForm
 					isLoading={isPending}
+					dispatchersEmail={dispatchersAll?.map((d) => d.email) ?? []}
 					onSubmit={(values) => {
 						createDispatch(values);
 					}}
