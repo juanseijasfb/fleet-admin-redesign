@@ -101,7 +101,7 @@ export default function index() {
 				addButtonText="Create Driver"
 				placeholderSearch="Search Driver"
 				showButton={selectedKeys === "all" || selectedKeys.size > 0}
-				actionButtonText="Modify Restrictions"
+				actionButtonText="Create Restriction"
 				defaultSearch={search}
 				onChangeSearch={(e) => handleSearch(e.target.value)}
 				addButtonAction={() => {
