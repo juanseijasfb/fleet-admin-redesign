@@ -44,7 +44,7 @@ export default function AddRestrictionCarrier({
     validationSchema: addRestrictionBrokerSchema,
     onSubmit: onSubmit,
   });
-  console.log(listBroker)
+
   return (
     <div className="flex flex-col gap-8 py-4">
       <h3 className="font-bold pt-2 ">Restriction to Carrier {carrierSelected?.carrier}</h3>
