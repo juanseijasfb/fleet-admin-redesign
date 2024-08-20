@@ -23,27 +23,30 @@ export default function index() {
 	const { dispatchersInfinite, dispatchersAll, isLoading, fetchNextPage, hasNextPage, refetchDispatchers } = useGetDispatchers({
 		search: debounced,
 	});
-	const [selectedDispatchId, setSelectedDispatchId] = useState<number>(0);
+	const [selectedDispatchId, setSelectedDispatchId] = useState<string>("0");
 	const [dispatchName, setDispatchName] = useState("");
 	const { assignedDriver, isLoadingAssigned, refetchAssignedDriver } = useGetAssignedDriver(selectedDriverEmail);
 	const { unassignedDriver, isLoadingUnassigned } = useGetUnassignedDriver(selectedDriverEmail);
-	const { disableDispatch } = useDisableDispatch(selectedDispatchId);
-	const { enableDispatch } = useEnableDispatch(selectedDispatchId);
+	const { disableDispatch } = useDisableDispatch(() => toast.success('Disabled successfully'));
+	const { enableDispatch } = useEnableDispatch(() => toast.success('Enabled successfully'));
 	const modal = useDisclosure();
 	const modalAssDriver = useDisclosure();
-	const [optionSelected, setOptionSelect] = useState<string>();
+	const [isDisable, setIsDisable] = useState<boolean>(false);
+	const [isEnable, setIsEnable] = useState<boolean>(false);
+	const [selectedIds, setSelectedIds] = useState<number[]>([])
 	const { createDispatch, isPending } = useCreateDispatch(() => {
 		modal.onClose();
 	});
 
 	const handleAction = (dispatcher: Dispatcher[], optionSelect: string) => {
-		setOptionSelect(optionSelect);
 		switch (optionSelect) {
 			case "disable":
-				setSelectedDispatchId(dispatcher.map((d) => d.id)[0]);
+				setIsDisable(true);
+				setSelectedDispatchId(dispatcher.map((d) => d.id.toString())[0]);
 				break;
 			case "enable":
-				setSelectedDispatchId(dispatcher.map((d) => d.id)[0]);
+				setIsEnable(true);
+				setSelectedDispatchId(dispatcher.map((d) => d.id.toString())[0]);
 				break;
 			case "assignDriver":
 				setDispatchName(`${dispatcher[0].firstName} ${dispatcher[0].lastName}`);
@@ -54,30 +57,36 @@ export default function index() {
 				break;
 		}
 	};
-	useEffect(() => {
-		switch (optionSelected) {
-			case "disable":
-				disableDispatch();
-				refetchDispatchers();
-				break;
-			case "enable":
-				enableDispatch();
-				refetchDispatchers();
-				break;
-			default:
-				refetchDispatchers();
-				break;
-		}
-		setOptionSelect("");
-		setSelectedDispatchId(0);
-	}, [optionSelected, selectedDispatchId]);
+
 	useEffect(() => {
 		refetchAssignedDriver();
 	}, [setDispatchName,selectedDriverEmail]);
+
+	useEffect(() => {
+		if (isDisable) {
+			if(Number.isNaN(selectedIds[0])){
+				disableDispatch(dispatchersAll?.map((d) => d.id).join(',') || '0');
+			} else {
+				disableDispatch(selectedIds.length > 1 ? selectedIds.join(',') : selectedDispatchId);
+			}
+		}
+		if (isEnable) {
+			if(Number.isNaN(selectedIds[0])){
+				enableDispatch(dispatchersAll?.map((d) => d.id).join(',') || '0');
+			} else {
+				enableDispatch(selectedIds.length > 1 ? selectedIds.join(',') : selectedDispatchId);
+			}
+		}
+		refetchDispatchers();
+		setSelectedDispatchId("0");
+		setIsDisable(false);
+		setIsEnable(false);
+	}, [isDisable, isEnable])
+
 	const handleAssignedDriverSubmit = (values: string[]) => {
 		console.log(values);
-    modalAssDriver.onClose();
-    toast.success('Driver assigned successfully');
+		modalAssDriver.onClose();
+		toast.success('Driver assigned successfully');
 	};
 	const dispatchers = dispatchersInfinite?.pages.flatMap(page => page.data) || [];
   
@@ -99,6 +108,7 @@ export default function index() {
 						isLoading={isLoading}
 						dispatchers={dispatchers ?? []}
 						onMultipleSelect={(e: Dispatcher[], optionSelect:string) => handleAction(e, optionSelect)}
+						listDispatchersId={(e) => setSelectedIds(e)}
 						fetchNextPage={fetchNextPage}
 						hasNextPage={hasNextPage}
 					/>

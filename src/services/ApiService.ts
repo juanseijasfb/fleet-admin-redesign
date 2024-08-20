@@ -301,12 +301,12 @@ export default class ApiService {
 	}
 
 	async activeDisableDriver(disableDriverBody: {
-		driversId: number;
+		driversId: string;
 		disable: boolean;
 	}) {
-		console.log(disableDriverBody.driversId.toString());
+
 		const params = new URLSearchParams();
-		params.append("driversId", disableDriverBody.driversId.toString());
+		params.append("driversId", disableDriverBody.driversId);
 
 		try {
 			const url = disableDriverBody.disable
@@ -325,11 +325,11 @@ export default class ApiService {
 		}
 	}
 	async activeDisableDispatch(disableDispatchBody: {
-		dispatcherId: number;
+		dispatcherId: string;
 		disable: boolean;
 	}) {
 		const params = new URLSearchParams();
-		params.append("dispatchers", disableDispatchBody.dispatcherId.toString());
+		params.append("dispatchers", disableDispatchBody.dispatcherId);
 
 		try {
 			const url = disableDispatchBody.disable

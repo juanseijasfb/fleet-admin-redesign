@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
 	Table,
 	TableHeader,
@@ -32,6 +32,7 @@ const statusColorMap: Record<DriverStatus, "success" | "danger"> = {
 interface DriverTableProps {
 	drivers: Driver[];
 	onMultipleSelect: (selectedDriver: Driver[], optionSelect: string) => void;
+	listDriversId: (id: number[]) => void;
 	isLoading?: boolean;
 	fetchNextPage: () => void,
 	hasNextPage: boolean,
@@ -40,10 +41,13 @@ interface DriverTableProps {
 export default function DriverTable({
 	drivers,
 	onMultipleSelect,
+	listDriversId,
 	isLoading,
 	fetchNextPage,
 	hasNextPage,
 }: DriverTableProps) {
+	const [modeSelectionTable, setModeSelectionTable] = useState<boolean>(false);
+	const [selectionTable, setSelectionTable] = useState<string[]>([]);
 	const renderCell = React.useCallback(
 		(driver: Driver, columnKey: ColumnKeys) => {
 			const cellValue = driver[columnKey as keyof Driver];
@@ -123,6 +127,23 @@ export default function DriverTable({
 		},
 		[],
 	);
+	const handlerSelectionChange = (e: any) => {
+        const values = Object.values(e).slice(0, 1);
+		if(e.size === 0){
+			setSelectionTable([]);
+		} else if (Array.isArray(values) && values.every(value => typeof value === 'string')) {
+			if(selectionTable.includes(values[0])){
+				const filter = selectionTable.filter(e => e !== values[0]);
+				setSelectionTable(filter);
+			}else{
+				setSelectionTable([...selectionTable, ...values]);
+			}
+        }
+    };
+	
+	useEffect(() => {
+		listDriversId(selectionTable.map(str => parseInt(str)))
+	},[selectionTable])
 
 	return (
 			<InfiniteScroll
@@ -138,6 +159,9 @@ export default function DriverTable({
 			>
 				<Table
 					aria-label="Example table with custom cells"
+					selectionMode={modeSelectionTable ? "multiple" : "single"}
+					onRowAction={() => setModeSelectionTable(!modeSelectionTable)}
+					onSelectionChange={(e) => handlerSelectionChange(e)}
 				>
 					<TableHeader columns={columns}>
 						{(column) => (
@@ -155,7 +179,7 @@ export default function DriverTable({
 						items={drivers}
 					>
 						{(item) => (
-							<TableRow key={item.id}>
+							<TableRow key={item.id} className="cursor-pointer">
 								{(columnKey) => (
 									<TableCell>
 										{renderCell(item, columnKey as ColumnKeys)}
