@@ -53,7 +53,7 @@ export default function AddRestrictionCarrier({
           size="lg"
           options={
             listBroker?.map((broker) => ({
-              label: broker.CompanyName,
+              label: broker.MCNumber + " - " + broker.CompanyName,
               value: broker.MCNumber,
             })) ?? []
           }
