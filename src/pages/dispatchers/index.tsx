@@ -6,6 +6,7 @@ import AddDispatcherForm from "@/components/forms/AddDispatchForm";
 import AssignedDriver from "@/components/forms/AssignedDriver";
 import { useDisableDispatch, useEnableDispatch } from "@/hooks/api/useChangeStatusDispatch";
 import useCreateDispatch from "@/hooks/api/useCreateDispatch";
+import { useAddDriverToDispatcher, useRemoveDriverToDispatcher } from "@/hooks/api/useDriverToDispatcher";
 import {
 	useGetAssignedDriver,
 	useGetUnassignedDriver,
@@ -23,10 +24,12 @@ export default function index() {
 	const { dispatchersInfinite, dispatchersAll, isLoading, fetchNextPage, hasNextPage, refetchDispatchers } = useGetDispatchers({
 		search: debounced,
 	});
+	const {addDriverToDispatcher, isPendingAssignedDriver} = useAddDriverToDispatcher(() => modalAssDriver.onClose());
+	const {removeDriverToDispatcher, isPendingRemoveDriver} = useRemoveDriverToDispatcher(() => modalAssDriver.onClose());
 	const [selectedDispatchId, setSelectedDispatchId] = useState<string>("0");
 	const [dispatchName, setDispatchName] = useState("");
 	const { assignedDriver, isLoadingAssigned, refetchAssignedDriver } = useGetAssignedDriver(selectedDriverEmail);
-	const { unassignedDriver, isLoadingUnassigned } = useGetUnassignedDriver(selectedDriverEmail);
+	const { unassignedDriver, isLoadingUnassigned, refecthUnassignedDriver } = useGetUnassignedDriver(selectedDriverEmail);
 	const { disableDispatch } = useDisableDispatch(() => toast.success('Disabled successfully'));
 	const { enableDispatch } = useEnableDispatch(() => toast.success('Enabled successfully'));
 	const modal = useDisclosure();
@@ -34,6 +37,8 @@ export default function index() {
 	const [isDisable, setIsDisable] = useState<boolean>(false);
 	const [isEnable, setIsEnable] = useState<boolean>(false);
 	const [selectedIds, setSelectedIds] = useState<number[]>([])
+	const [driversToDispatcherRemove ,setDriversToDispatchRemove] = useState<string>("");
+	const [driversToDispatcher ,setDriversToDispatch] = useState<string>("");
 	const { createDispatch, isPending } = useCreateDispatch(() => {
 		modal.onClose();
 	});
@@ -51,6 +56,8 @@ export default function index() {
 			case "assignDriver":
 				setDispatchName(`${dispatcher[0].firstName} ${dispatcher[0].lastName}`);
 				setSelectedDriverEmail(dispatcher[0].email);
+				refetchAssignedDriver();
+				refecthUnassignedDriver();
 				modalAssDriver.onOpen();
 				break;
 			default:
@@ -83,11 +90,23 @@ export default function index() {
 		setIsEnable(false);
 	}, [isDisable, isEnable])
 
-	const handleAssignedDriverSubmit = (values: string[]) => {
-		console.log(values);
-		modalAssDriver.onClose();
-		toast.success('Driver assigned successfully');
-	};
+	useEffect(() => {
+		if(selectedDriverEmail){
+			if(driversToDispatcher){
+				addDriverToDispatcher({dispatcherEmail:selectedDriverEmail, driversList:driversToDispatcher});
+			}
+			if(driversToDispatcherRemove){
+				removeDriverToDispatcher({dispatcherEmail:selectedDriverEmail, driversList:driversToDispatcherRemove});
+			}
+			toast.success('Driver assigned successfully')
+		}
+	}, [driversToDispatcher, driversToDispatcherRemove])
+
+	const handleSaveForm = (values:string[], valuesRemove:string[]) => {
+		setDriversToDispatchRemove(valuesRemove.join(','));
+		setDriversToDispatch(values.join(','));
+	} 
+
 	const dispatchers = dispatchersInfinite?.pages.flatMap(page => page.data) || [];
   
 	return (
@@ -134,10 +153,8 @@ export default function index() {
 				) : (
 					<AssignedDriver
 						onClose={modalAssDriver.onClose}
-						onSubmit={(values) => {
-							handleAssignedDriverSubmit(values);
-						}}
-						isLoading={isLoadingAssigned && isLoadingUnassigned}
+						onSubmit={(values, valuesRemove) => handleSaveForm(values, valuesRemove)}
+						isLoading={isLoadingAssigned && isLoadingUnassigned && isPendingAssignedDriver && isPendingRemoveDriver}
 						dispatcherName={dispatchName}
 						driverAssigned={assignedDriver ?? []}
 						driverUnassigned={unassignedDriver ?? []}

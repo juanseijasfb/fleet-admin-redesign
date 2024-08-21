@@ -347,6 +347,50 @@ export default class ApiService {
 			console.error("Error:", error);
 		}
 	}
+	async addDriverToDispatcher(driverToDispatcherBody: {
+		dispatcherEmail: string;
+		driversList: string;
+	}) {
+		const params = new URLSearchParams({
+			dispatcher: driverToDispatcherBody.dispatcherEmail,
+			driversList: driverToDispatcherBody.driversList,
+		});
+	
+		try {
+			const response = await this.request<any[]>({
+				path: "/addDriverToDispatcher",
+				method: "POST",
+				headers: {
+					"Content-Type": "application/x-www-form-urlencoded",
+				},
+				body: params,
+			});
+		} catch (error) {
+			console.error("Error:", error);
+		}
+	}
+	async removeDriverToDispatcher(driverToDispatcherBody: {
+		dispatcherEmail: string;
+		driversList: string;
+	}) {
+		const params = new URLSearchParams({
+			dispatcher: driverToDispatcherBody.dispatcherEmail,
+			driversList: driverToDispatcherBody.driversList,
+		});
+	
+		try {
+			const response = await this.request<any[]>({
+				path: "/removeDriverFromDispatcher",
+				method: "POST",
+				headers: {
+					"Content-Type": "application/x-www-form-urlencoded",
+				},
+				body: params,
+			});
+		} catch (error) {
+			console.error("Error:", error);
+		}
+	}
 	async addRestriccionDriver(addRestriccionBody: {
 		subject:string,
 		state?:string,
