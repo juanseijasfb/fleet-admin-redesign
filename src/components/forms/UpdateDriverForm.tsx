@@ -6,6 +6,7 @@ import Select from "../Select";
 import TextInput from "../TextInput";
 import { driverSchema, driverUpdateSchema } from "./schema";
 import SelectCarriers from "../SelectCarriers";
+import { Driver } from "@/utils/types";
 
 export interface UpdateDriverValues {
 	firstName: string;
@@ -17,7 +18,7 @@ export interface UpdateDriverValues {
 	weight: string;
 }
 interface UpdateDriverFormProps {
-	defaultValues: UpdateDriverValues[];
+	defaultValues: Driver[];
 	onSubmit: (values: UpdateDriverValues) => void;
 	initialValues?: UpdateDriverValues;
 	isLoading?: boolean;
@@ -35,9 +36,9 @@ export default function UpdateDriverForm({
 			firstName: defaultValues[0]?.firstName || "",
 			lastName: defaultValues[0].lastName || "",
 			email: defaultValues[0].email || "",
-			mcNumber: defaultValues[0].mcNumber || "",
+			mcNumber: defaultValues[0].mcNumber.toString() || "",
 			carrier: defaultValues[0].carrier || "",
-			weight: defaultValues[0].weight || "",
+			weight: defaultValues[0].weight.toString() || "",
 			equipment: defaultValues[0].equipment || "",
 		},
 		validationSchema: driverUpdateSchema(driverEmail, defaultValues[0].email),

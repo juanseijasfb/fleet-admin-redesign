@@ -36,6 +36,7 @@ export default function index() {
 	const modalAssDriver = useDisclosure();
 	const [isDisable, setIsDisable] = useState<boolean>(false);
 	const [isEnable, setIsEnable] = useState<boolean>(false);
+	const [btnMultiAction, setBtnMultiAction] = useState<boolean>(false);
 	const [selectedIds, setSelectedIds] = useState<number[]>([])
 	const [driversToDispatcherRemove ,setDriversToDispatchRemove] = useState<string>("");
 	const [driversToDispatcher ,setDriversToDispatch] = useState<string>("");
@@ -43,19 +44,25 @@ export default function index() {
 		modal.onClose();
 	});
 
-	const handleAction = (dispatcher: Dispatcher[], optionSelect: string) => {
+	const handleAction = (optionSelect: string, dispatcher?: Dispatcher[]) => {
 		switch (optionSelect) {
 			case "disable":
 				setIsDisable(true);
-				setSelectedDispatchId(dispatcher.map((d) => d.id.toString())[0]);
+				if(dispatcher){
+					setSelectedDispatchId(dispatcher.map((d) => d.id.toString())[0]);
+				}
 				break;
 			case "enable":
 				setIsEnable(true);
-				setSelectedDispatchId(dispatcher.map((d) => d.id.toString())[0]);
+				if(dispatcher){
+					setSelectedDispatchId(dispatcher.map((d) => d.id.toString())[0]);
+				}
 				break;
 			case "assignDriver":
-				setDispatchName(`${dispatcher[0].firstName} ${dispatcher[0].lastName}`);
-				setSelectedDriverEmail(dispatcher[0].email);
+				if(dispatcher){
+					setDispatchName(`${dispatcher[0].firstName} ${dispatcher[0].lastName}`);
+					setSelectedDriverEmail(dispatcher[0].email);
+				}
 				refetchAssignedDriver();
 				refecthUnassignedDriver();
 				modalAssDriver.onOpen();
@@ -71,23 +78,24 @@ export default function index() {
 
 	useEffect(() => {
 		if (isDisable) {
-			if(Number.isNaN(selectedIds[0])){
+			if(selectedIds.some(Number.isNaN)){
 				disableDispatch(dispatchersAll?.map((d) => d.id).join(',') || '0');
 			} else {
-				disableDispatch(selectedIds.length > 1 ? selectedIds.join(',') : selectedDispatchId);
+				disableDispatch(selectedIds.length > 0 ? selectedIds.join(',') : selectedDispatchId);
 			}
 		}
 		if (isEnable) {
-			if(Number.isNaN(selectedIds[0])){
+			if(selectedIds.some(Number.isNaN)){
 				enableDispatch(dispatchersAll?.map((d) => d.id).join(',') || '0');
 			} else {
-				enableDispatch(selectedIds.length > 1 ? selectedIds.join(',') : selectedDispatchId);
+				enableDispatch(selectedIds.length > 0 ? selectedIds.join(',') : selectedDispatchId);
 			}
 		}
 		refetchDispatchers();
 		setSelectedDispatchId("0");
 		setIsDisable(false);
 		setIsEnable(false);
+		setBtnMultiAction(false);
 	}, [isDisable, isEnable])
 
 	useEffect(() => {
@@ -102,6 +110,10 @@ export default function index() {
 		}
 	}, [driversToDispatcher, driversToDispatcherRemove])
 
+	useEffect(() => {
+		selectedIds.length > 0 || Number.isNaN(selectedIds[0]) ? setBtnMultiAction(true) : setBtnMultiAction(false); 
+	},[selectedIds])
+
 	const handleSaveForm = (values:string[], valuesRemove:string[]) => {
 		setDriversToDispatchRemove(valuesRemove.join(','));
 		setDriversToDispatch(values.join(','));
@@ -115,8 +127,10 @@ export default function index() {
 				title="Dispatchers"
 				addButtonText="Create Dispatcher"
 				placeholderSearch="Search Dispatcher"
+				multiActionBtn={btnMultiAction}
 				addButtonAction={() => modal.onOpen()}
 				defaultSearch={search}
+				onMultipleSelect={(optionSelect) => handleAction(optionSelect)}
 				onChangeSearch={(e: React.ChangeEvent<HTMLInputElement>) => {
 					handleSearch(e.target.value);
 				}}
@@ -126,10 +140,11 @@ export default function index() {
 					<DispatcherTable
 						isLoading={isLoading}
 						dispatchers={dispatchers ?? []}
-						onMultipleSelect={(e: Dispatcher[], optionSelect:string) => handleAction(e, optionSelect)}
+						onMultipleSelect={(e: Dispatcher[], optionSelect:string) => handleAction(optionSelect, e)}
 						listDispatchersId={(e) => setSelectedIds(e)}
 						fetchNextPage={fetchNextPage}
 						hasNextPage={hasNextPage}
+						showMultipleSelect={btnMultiAction}
 					/>
 				}
 			</div>

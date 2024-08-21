@@ -34,6 +34,7 @@ interface DispatcherTableProps {
 	isLoading: boolean;
 	fetchNextPage: () => void,
 	hasNextPage: boolean,
+	showMultipleSelect: boolean
 }
 
 export default function DispatcherTable({
@@ -43,8 +44,9 @@ export default function DispatcherTable({
 	isLoading,
 	fetchNextPage,
 	hasNextPage,
+	showMultipleSelect,
 }: DispatcherTableProps) {
-	const [modeSelectionTable, setModeSelectionTable] = useState<boolean>(false);
+	const [modeSelectionTable, setModeSelectionTable] = useState<boolean>(showMultipleSelect);
 	const [selectionTable, setSelectionTable] = useState<string[]>([]);
 	const renderCell = React.useCallback(
 		(dispatcher: Dispatcher, columnKey: ColumnKeys) => {
@@ -111,18 +113,13 @@ export default function DispatcherTable({
 		[],
 	);
 	const handlerSelectionChange = (e: any) => {
-        const values = Object.values(e).slice(0, 1);
-		if(e.size === 0){
-			setSelectionTable([]);
-		} else if (Array.isArray(values) && values.every(value => typeof value === 'string')) {
-			if(selectionTable.includes(values[0])){
-				const filter = selectionTable.filter(e => e !== values[0]);
-				setSelectionTable(filter);
-			}else{
-				setSelectionTable([...selectionTable, ...values]);
-			}
-        }
+		const arrFromSet = [...e]
+		e.size === 0 ? setSelectionTable([]) : setSelectionTable(arrFromSet);
     };
+	
+	useEffect(() => {
+		setModeSelectionTable(showMultipleSelect)
+	},[showMultipleSelect])
 
 	useEffect(() => {
 		listDispatchersId(selectionTable.map(str => parseInt(str)))
@@ -141,7 +138,8 @@ export default function DispatcherTable({
 			style={{ paddingBottom: "10px" }}>
 			<Table
 				aria-label="Example table with custom cells"
-				selectionMode={modeSelectionTable ? "multiple" : "single"}
+				selectionMode={"multiple"}
+				selectionBehavior={modeSelectionTable ? "toggle" : "replace"}
 				onRowAction={() => setModeSelectionTable(!modeSelectionTable)}
 				onSelectionChange={(e) => handlerSelectionChange(e)}
 			>

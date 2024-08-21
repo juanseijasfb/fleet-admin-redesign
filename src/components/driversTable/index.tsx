@@ -36,6 +36,7 @@ interface DriverTableProps {
 	isLoading?: boolean;
 	fetchNextPage: () => void,
 	hasNextPage: boolean,
+	showMultipleSelect: boolean
 }
 
 export default function DriverTable({
@@ -45,8 +46,9 @@ export default function DriverTable({
 	isLoading,
 	fetchNextPage,
 	hasNextPage,
+	showMultipleSelect
 }: DriverTableProps) {
-	const [modeSelectionTable, setModeSelectionTable] = useState<boolean>(false);
+	const [modeSelectionTable, setModeSelectionTable] = useState<boolean>(showMultipleSelect);
 	const [selectionTable, setSelectionTable] = useState<string[]>([]);
 	const renderCell = React.useCallback(
 		(driver: Driver, columnKey: ColumnKeys) => {
@@ -128,19 +130,14 @@ export default function DriverTable({
 		[],
 	);
 	const handlerSelectionChange = (e: any) => {
-        const values = Object.values(e).slice(0, 1);
-		if(e.size === 0){
-			setSelectionTable([]);
-		} else if (Array.isArray(values) && values.every(value => typeof value === 'string')) {
-			if(selectionTable.includes(values[0])){
-				const filter = selectionTable.filter(e => e !== values[0]);
-				setSelectionTable(filter);
-			}else{
-				setSelectionTable([...selectionTable, ...values]);
-			}
-        }
+        const arrFromSet = [...e]
+		e.size === 0 ? setSelectionTable([]) : setSelectionTable(arrFromSet);
     };
 	
+	useEffect(() => {
+		setModeSelectionTable(showMultipleSelect)
+	},[showMultipleSelect])
+
 	useEffect(() => {
 		listDriversId(selectionTable.map(str => parseInt(str)))
 	},[selectionTable])
@@ -159,7 +156,8 @@ export default function DriverTable({
 			>
 				<Table
 					aria-label="Example table with custom cells"
-					selectionMode={modeSelectionTable ? "multiple" : "single"}
+					selectionMode={"multiple"}
+					selectionBehavior={modeSelectionTable ? "toggle" : "replace"}
 					onRowAction={() => setModeSelectionTable(!modeSelectionTable)}
 					onSelectionChange={(e) => handlerSelectionChange(e)}
 				>

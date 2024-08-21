@@ -29,7 +29,7 @@ export default function index() {
 	const { driversInfinite, driversAll, isLoading, fetchNextPage, hasNextPage, refetchDrivers } = useGetDrivers(debounced);
 	const [selectedDriverId, setSelectedDriverId] = useState<string>("0");
 	const [selectedDriverName, setSelectedDriverName] = useState<string>("");
-	const [selectedDriver, setSelectedDriver] = useState<UpdateDriverValues[]>(
+	const [selectedDriver, setSelectedDriver] = useState<Driver[]>(
 		[],
 	);
 	const { disableDriver } = useDisableDriver(() => toast.success('Disabled successfully'));
@@ -45,27 +45,28 @@ export default function index() {
 	const [selectedIds, setSelectedIds] = useState<number[]>([])
 	const [isDisable, setIsDisable] = useState<boolean>(false);
 	const [isEnable, setIsEnable] = useState<boolean>(false);
+	const [btnMultiAction, setBtnMultiAction] = useState<boolean>(false);
 	const { addRestriccion, addRPending } = useAddRestriccion(() => { modalRestriction.onClose(); toast.success('Restriction added successfully');}, "driver")
 	const { removeRestriccion, isPendingRemove } = useRemoveRestriccion(() => { modalShowRestrictions.onClose();toast.success('Restriction removed successfully')});
 	const { restriccionsDrivers, isLoadingRestriccions, refetchRestriccionsDrivers } = useGetRestriccionDriver(selectedDriverName);
 
-	const handlerMultipleSelect = (e: any[], optionSelect: string) => {
+	const handleAction = (optionSelect: string, e?: Driver[]) => {
 		switch (optionSelect) {
 			case "edit":
-				setSelectedDriver(e);
+				e && setSelectedDriver(e);
 				modalUpdate.onOpen();
 				break;
 			case "disable":
 				setIsDisable(true);
-				setSelectedDriverId(e[0].id);
+				e && setSelectedDriverId(e[0].id.toString());
 				break;
 			case "enable":
 				setIsEnable(true);
-				setSelectedDriverId(e[0].id);
+				e && setSelectedDriverId(e[0].id.toString());
 				break;
 			case "showRestrictions":
 				refetchRestriccionsDrivers();
-				setSelectedDriverName(e[0].firstName);
+				e && setSelectedDriverName(e[0].firstName);
 				modalShowRestrictions.onOpen();
 				break;
 			default:
@@ -74,15 +75,19 @@ export default function index() {
 	};
 
 	useEffect(() => {
+		selectedIds.length > 0 || Number.isNaN(selectedIds[0]) ? setBtnMultiAction(true) : setBtnMultiAction(false); 
+	},[selectedIds])
+
+	useEffect(() => {
 		if (isDisable) {
-			if(Number.isNaN(selectedIds[0])){
+			if(selectedIds.some(Number.isNaN)){
 				disableDriver(driversAll?.map((d) => d.id).join(',') || '0');
 			} else {
 				disableDriver(selectedIds.length > 1 ? selectedIds.join(',') : selectedDriverId);
 			}
 		}
 		if (isEnable) {
-			if(Number.isNaN(selectedIds[0])){
+			if(selectedIds.some(Number.isNaN)){
 				enableDriver(driversAll?.map((d) => d.id).join(',') || '0');
 			} else {
 				enableDriver(selectedIds.length > 1 ? selectedIds.join(',') : selectedDriverId);
@@ -92,6 +97,7 @@ export default function index() {
 		setSelectedDriverId("0");
 		setIsDisable(false);
 		setIsEnable(false);
+		setBtnMultiAction(false);
 	}, [isDisable, isEnable])
 
 	const drivers = driversInfinite?.pages.flatMap(page => page.data) || [];
@@ -110,6 +116,8 @@ export default function index() {
 				actionButtonText="Create Restriction"
 				defaultSearch={search}
 				onChangeSearch={(e) => handleSearch(e.target.value)}
+				multiActionBtn={btnMultiAction}
+				onMultipleSelect={(optionSelect) => handleAction(optionSelect)}
 				addButtonAction={() => {
 					modal.onOpen();
 				}}
@@ -129,11 +137,12 @@ export default function index() {
 					isLoading={isLoading}
 					drivers={drivers ?? []}
 					onMultipleSelect={(selectedDriver: Driver[], optionSelect: string) =>
-						handlerMultipleSelect(selectedDriver, optionSelect)
+						handleAction(optionSelect, selectedDriver)
 					}
 					listDriversId={(e) => setSelectedIds(e)}
 					fetchNextPage={fetchNextPage}
 					hasNextPage={hasNextPage}
+					showMultipleSelect={btnMultiAction}
 				/>
 			</div>
 			<ModalForm isOpen={modal.isOpen} onOpenChange={modal.onOpenChange}>
