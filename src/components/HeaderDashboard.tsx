@@ -55,9 +55,6 @@ export default function HeaderDashboard({
 						<DropdownItem onClick={() => onMultipleSelect("disable")}>
 							Disable
 						</DropdownItem>
-						<DropdownItem onClick={() => onMultipleSelect("assignDriver")}>
-							Assign driver
-						</DropdownItem>
 					</DropdownMenu>
 				</Dropdown>
 				)}

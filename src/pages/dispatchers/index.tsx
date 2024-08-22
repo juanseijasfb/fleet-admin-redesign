@@ -59,6 +59,15 @@ export default function index() {
 				}
 				break;
 			case "assignDriver":
+				
+				const listDispatcher = selectedIds
+				.map(id => dispatchersAll?.find(d => d.id === id)?.email)
+				.filter(email => email !== undefined);
+				
+				console.log(listDispatcher.join(','))
+				if (listDispatcher) {
+					console.log(listDispatcher)
+				}
 				if(dispatcher){
 					setDispatchName(`${dispatcher[0].firstName} ${dispatcher[0].lastName}`);
 					setSelectedDriverEmail(dispatcher[0].email);
@@ -66,6 +75,7 @@ export default function index() {
 				refetchAssignedDriver();
 				refecthUnassignedDriver();
 				modalAssDriver.onOpen();
+				
 				break;
 			default:
 				break;
@@ -108,6 +118,7 @@ export default function index() {
 			}
 			toast.success('Driver assigned successfully')
 		}
+		setBtnMultiAction(false);
 	}, [driversToDispatcher, driversToDispatcherRemove])
 
 	useEffect(() => {
