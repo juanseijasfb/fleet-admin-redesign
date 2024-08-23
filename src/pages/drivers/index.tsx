@@ -10,7 +10,7 @@ import useCreateDriver from "@/hooks/api/useCreateDriver";
 import UpdateDriverForm, {
 	type UpdateDriverValues,
 } from "@/components/forms/UpdateDriverForm";
-import type { AddRestrictionDriverValues } from "@/components/forms/AddRestrictionDriverForm";
+import type { ValuesFormAddRestriction } from "@/components/forms/AddRestrictionDriverForm";
 import AddRestrictionDriverForm from "@/components/forms/AddRestrictionDriverForm";
 import type { Driver, GetRestriccionResponseAPI } from "@/utils/types";
 import {
@@ -100,6 +100,16 @@ export default function index() {
 		setBtnMultiAction(false);
 	}, [isDisable, isEnable])
 
+	const handleSubmit = (e:any) => {
+		if(e.subjectValue.length > 1){
+			e.subjectValue.forEach((item:any) => {
+				addRestriccion({subject: e.subject,state: e.state, type: e.type,subjectValue: item,typeValue: e.typeValue,validUntil: e.validUntil})
+			})
+		} else if(e.subjectValue.length === 0){
+			addRestriccion({subject: e.subject,state: e.state, type: e.type,subjectValue: e.subjectValue[0],typeValue: e.typeValue,validUntil: e.validUntil})
+		}
+	}
+
 	const drivers = driversInfinite?.pages.flatMap(page => page.data) || [];
 	const driversList = drivers?.map((e) => ({
 		label: e.firstName.replace(/,/g," "),
@@ -175,7 +185,7 @@ export default function index() {
 			>
 				<AddRestrictionDriverForm
 					onClose={modalRestriction.onClose}
-					onSubmit={(e: AddRestrictionDriverValues) => addRestriccion({subject: e.subject,state: e.state, type: e.type,subjectValue: e.subjectValue,typeValue: e.typeValue,validUntil: e.validUntil})}
+					onSubmit={(e: ValuesFormAddRestriction) => handleSubmit(e)}
 					driverList={driversList ?? []}
 					isLoading={addRPending}
 				/>
