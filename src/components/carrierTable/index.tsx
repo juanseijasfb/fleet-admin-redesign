@@ -54,8 +54,8 @@ export default function CarrierTable({
 								<DropdownItem onClick={() => onMultipleSelect([carrier])}>
 									Add restriction broker
 								</DropdownItem>
-								<DropdownItem>Edit</DropdownItem>
-								<DropdownItem>Delete</DropdownItem>
+								{/* <DropdownItem>Edit</DropdownItem>
+								<DropdownItem>Delete</DropdownItem> */}
 							</DropdownMenu>
 						</Dropdown>
 					);
