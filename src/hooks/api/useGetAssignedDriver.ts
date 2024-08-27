@@ -16,7 +16,7 @@ export function useGetAssignedDriver(email: string) {
   return { assignedDriver: data, isLoadingAssigned: isLoading, isError, refetchAssignedDriver };
 }
 export function useGetUnassignedDriver(email: string) {
-  const { data, isLoading, isError } = useQuery({
+  const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ["dispatcher", email],
     queryFn: async () => {
       const api = new ApiService();
@@ -24,5 +24,8 @@ export function useGetUnassignedDriver(email: string) {
     },
     enabled: !!email,
   });
-  return { unassignedDriver: data, isLoadingUnassigned: isLoading, isError };
+  const refecthUnassignedDriver = async () => {
+    return refetch();
+  }
+  return { unassignedDriver: data, isLoadingUnassigned: isLoading, isError, refecthUnassignedDriver };
 }

@@ -36,6 +36,7 @@ export default function index() {
 				title="Carriers"
 				addButtonText="Create Carrier"
 				placeholderSearch="Search Carrier"
+				onMultipleSelect={(e) => console.log(e)}
 				onChangeSearch={(e) => {
 					handleSearch(e.target.value);
 				}}

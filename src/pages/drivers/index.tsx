@@ -10,7 +10,7 @@ import useCreateDriver from "@/hooks/api/useCreateDriver";
 import UpdateDriverForm, {
 	type UpdateDriverValues,
 } from "@/components/forms/UpdateDriverForm";
-import type { AddRestrictionDriverValues } from "@/components/forms/AddRestrictionDriverForm";
+import type { ValuesFormAddRestriction } from "@/components/forms/AddRestrictionDriverForm";
 import AddRestrictionDriverForm from "@/components/forms/AddRestrictionDriverForm";
 import type { Driver, GetRestriccionResponseAPI } from "@/utils/types";
 import {
@@ -27,14 +27,13 @@ export default function index() {
 	const { search, handleSearch, debounced } = useSearch("drivers");
 
 	const { driversInfinite, driversAll, isLoading, fetchNextPage, hasNextPage, refetchDrivers } = useGetDrivers(debounced);
-	const [selectedDriverId, setSelectedDriverId] = useState<number>(0);
+	const [selectedDriverId, setSelectedDriverId] = useState<string>("0");
 	const [selectedDriverName, setSelectedDriverName] = useState<string>("");
-	const [optionSelected, setOptionSelect] = useState<string>();
-	const [selectedDriver, setSelectedDriver] = useState<UpdateDriverValues[]>(
+	const [selectedDriver, setSelectedDriver] = useState<Driver[]>(
 		[],
 	);
-	const { disableDriver } = useDisableDriver(selectedDriverId);
-	const { enableDriver } = useEnableDriver(selectedDriverId);
+	const { disableDriver } = useDisableDriver(() => toast.success('Disabled successfully'));
+	const { enableDriver } = useEnableDriver(() => toast.success('Enabled successfully'));
 	const [selectedKeys, setSelectedKeys] = React.useState<Selection>(new Set());
 	const modal = useDisclosure();
 	const modalUpdate = useDisclosure();
@@ -43,50 +42,73 @@ export default function index() {
 	const { createDriver, isPending } = useCreateDriver(() => {
 		modal.onClose();
 	});
+	const [selectedIds, setSelectedIds] = useState<number[]>([])
+	const [isDisable, setIsDisable] = useState<boolean>(false);
+	const [isEnable, setIsEnable] = useState<boolean>(false);
+	const [btnMultiAction, setBtnMultiAction] = useState<boolean>(false);
 	const { addRestriccion, addRPending } = useAddRestriccion(() => { modalRestriction.onClose(); toast.success('Restriction added successfully');}, "driver")
 	const { removeRestriccion, isPendingRemove } = useRemoveRestriccion(() => { modalShowRestrictions.onClose();toast.success('Restriction removed successfully')});
 	const { restriccionsDrivers, isLoadingRestriccions, refetchRestriccionsDrivers } = useGetRestriccionDriver(selectedDriverName);
-	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
-	useEffect(() => {
-		switch (optionSelected) {
-			case "disable":
-				disableDriver();
-				refetchDrivers();
-				break;
-			case "enable":
-				enableDriver();
-				refetchDrivers();
-				break;
-			default:
-				refetchDrivers();
-				break;
-		}
-		setOptionSelect("");
-		setSelectedDriverId(0);
-	}, [optionSelected, selectedDriverId]);
 
-	const handlerMultipleSelect = (e: any[], optionSelect: string) => {
-		setOptionSelect(optionSelect);
+	const handleAction = (optionSelect: string, e?: Driver[]) => {
 		switch (optionSelect) {
 			case "edit":
-				setSelectedDriver(e);
+				e && setSelectedDriver(e);
 				modalUpdate.onOpen();
 				break;
 			case "disable":
-				setSelectedDriverId(e[0].id);
+				setIsDisable(true);
+				e && setSelectedDriverId(e[0].id.toString());
 				break;
 			case "enable":
-				setSelectedDriverId(e[0].id);
+				setIsEnable(true);
+				e && setSelectedDriverId(e[0].id.toString());
 				break;
 			case "showRestrictions":
 				refetchRestriccionsDrivers();
-				setSelectedDriverName(e[0].firstName);
+				e && setSelectedDriverName(e[0].firstName);
 				modalShowRestrictions.onOpen();
 				break;
 			default:
 				break;
 		}
 	};
+
+	useEffect(() => {
+		selectedIds.length > 0 || Number.isNaN(selectedIds[0]) ? setBtnMultiAction(true) : setBtnMultiAction(false); 
+	},[selectedIds])
+
+	useEffect(() => {
+		if (isDisable) {
+			if(selectedIds.some(Number.isNaN)){
+				disableDriver(driversAll?.map((d) => d.id).join(',') || '0');
+			} else {
+				disableDriver(selectedIds.length > 1 ? selectedIds.join(',') : selectedDriverId);
+			}
+		}
+		if (isEnable) {
+			if(selectedIds.some(Number.isNaN)){
+				enableDriver(driversAll?.map((d) => d.id).join(',') || '0');
+			} else {
+				enableDriver(selectedIds.length > 1 ? selectedIds.join(',') : selectedDriverId);
+			}
+		}
+		refetchDrivers();
+		setSelectedDriverId("0");
+		setIsDisable(false);
+		setIsEnable(false);
+		setBtnMultiAction(false);
+	}, [isDisable, isEnable])
+
+	const handleSubmit = (e:any) => {
+		if(e.subjectValue.length > 1){
+			e.subjectValue.forEach((item:any) => {
+				addRestriccion({subject: e.subject,state: e.state, type: e.type,subjectValue: item,typeValue: e.typeValue,validUntil: e.validUntil})
+			})
+		} else if(e.subjectValue.length === 0){
+			addRestriccion({subject: e.subject,state: e.state, type: e.type,subjectValue: e.subjectValue[0],typeValue: e.typeValue,validUntil: e.validUntil})
+		}
+	}
 
 	const drivers = driversInfinite?.pages.flatMap(page => page.data) || [];
 	const driversList = drivers?.map((e) => ({
@@ -104,6 +126,8 @@ export default function index() {
 				actionButtonText="Create Restriction"
 				defaultSearch={search}
 				onChangeSearch={(e) => handleSearch(e.target.value)}
+				multiActionBtn={btnMultiAction}
+				onMultipleSelect={(optionSelect) => handleAction(optionSelect)}
 				addButtonAction={() => {
 					modal.onOpen();
 				}}
@@ -123,10 +147,12 @@ export default function index() {
 					isLoading={isLoading}
 					drivers={drivers ?? []}
 					onMultipleSelect={(selectedDriver: Driver[], optionSelect: string) =>
-						handlerMultipleSelect(selectedDriver, optionSelect)
+						handleAction(optionSelect, selectedDriver)
 					}
+					listDriversId={(e) => setSelectedIds(e)}
 					fetchNextPage={fetchNextPage}
 					hasNextPage={hasNextPage}
+					showMultipleSelect={btnMultiAction}
 				/>
 			</div>
 			<ModalForm isOpen={modal.isOpen} onOpenChange={modal.onOpenChange}>
@@ -159,7 +185,7 @@ export default function index() {
 			>
 				<AddRestrictionDriverForm
 					onClose={modalRestriction.onClose}
-					onSubmit={(e: AddRestrictionDriverValues) => addRestriccion({subject: e.subject,state: e.state, type: e.type,subjectValue: e.subjectValue,typeValue: e.typeValue,validUntil: e.validUntil})}
+					onSubmit={(e: ValuesFormAddRestriction) => handleSubmit(e)}
 					driverList={driversList ?? []}
 					isLoading={addRPending}
 				/>

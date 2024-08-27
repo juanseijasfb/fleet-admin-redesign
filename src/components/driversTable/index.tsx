@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
 	Table,
 	TableHeader,
@@ -32,18 +32,24 @@ const statusColorMap: Record<DriverStatus, "success" | "danger"> = {
 interface DriverTableProps {
 	drivers: Driver[];
 	onMultipleSelect: (selectedDriver: Driver[], optionSelect: string) => void;
+	listDriversId: (id: number[]) => void;
 	isLoading?: boolean;
 	fetchNextPage: () => void,
 	hasNextPage: boolean,
+	showMultipleSelect: boolean
 }
 
 export default function DriverTable({
 	drivers,
 	onMultipleSelect,
+	listDriversId,
 	isLoading,
 	fetchNextPage,
 	hasNextPage,
+	showMultipleSelect
 }: DriverTableProps) {
+	const [modeSelectionTable, setModeSelectionTable] = useState<boolean>(showMultipleSelect);
+	const [selectionTable, setSelectionTable] = useState<string[]>([]);
 	const renderCell = React.useCallback(
 		(driver: Driver, columnKey: ColumnKeys) => {
 			const cellValue = driver[columnKey as keyof Driver];
@@ -123,6 +129,18 @@ export default function DriverTable({
 		},
 		[],
 	);
+	const handlerSelectionChange = (e: any) => {
+        const arrFromSet = [...e]
+		e.size === 0 ? setSelectionTable([]) : setSelectionTable(arrFromSet);
+    };
+	
+	useEffect(() => {
+		setModeSelectionTable(showMultipleSelect)
+	},[showMultipleSelect])
+
+	useEffect(() => {
+		listDriversId(selectionTable.map(str => parseInt(str)))
+	},[selectionTable])
 
 	return (
 			<InfiniteScroll
@@ -138,6 +156,10 @@ export default function DriverTable({
 			>
 				<Table
 					aria-label="Example table with custom cells"
+					selectionMode={"multiple"}
+					selectionBehavior={modeSelectionTable ? "toggle" : "replace"}
+					onRowAction={() => setModeSelectionTable(!modeSelectionTable)}
+					onSelectionChange={(e) => handlerSelectionChange(e)}
 				>
 					<TableHeader columns={columns}>
 						{(column) => (
@@ -155,7 +177,7 @@ export default function DriverTable({
 						items={drivers}
 					>
 						{(item) => (
-							<TableRow key={item.id}>
+							<TableRow key={item.id} className="cursor-pointer">
 								{(columnKey) => (
 									<TableCell>
 										{renderCell(item, columnKey as ColumnKeys)}

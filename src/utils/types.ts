@@ -92,3 +92,7 @@ export type GetRestriccionResponseAPI = {
 	TypeValue: string;
 	ValidUntil: string;
 }
+export type OptionSelect = {
+  label: string;
+  value: string;
+}

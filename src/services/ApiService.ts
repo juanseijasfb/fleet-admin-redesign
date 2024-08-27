@@ -301,12 +301,12 @@ export default class ApiService {
 	}
 
 	async activeDisableDriver(disableDriverBody: {
-		driversId: number;
+		driversId: string;
 		disable: boolean;
 	}) {
-		console.log(disableDriverBody.driversId.toString());
+
 		const params = new URLSearchParams();
-		params.append("driversId", disableDriverBody.driversId.toString());
+		params.append("driversId", disableDriverBody.driversId);
 
 		try {
 			const url = disableDriverBody.disable
@@ -325,11 +325,11 @@ export default class ApiService {
 		}
 	}
 	async activeDisableDispatch(disableDispatchBody: {
-		dispatcherId: number;
+		dispatcherId: string;
 		disable: boolean;
 	}) {
 		const params = new URLSearchParams();
-		params.append("dispatchers", disableDispatchBody.dispatcherId.toString());
+		params.append("dispatchers", disableDispatchBody.dispatcherId);
 
 		try {
 			const url = disableDispatchBody.disable
@@ -337,6 +337,50 @@ export default class ApiService {
 				: "/enableDispatchers";
 			const response = await this.request<any[]>({
 				path: `${url}`,
+				method: "POST",
+				headers: {
+					"Content-Type": "application/x-www-form-urlencoded",
+				},
+				body: params,
+			});
+		} catch (error) {
+			console.error("Error:", error);
+		}
+	}
+	async addDriverToDispatcher(driverToDispatcherBody: {
+		dispatcherEmail: string;
+		driversList: string;
+	}) {
+		const params = new URLSearchParams({
+			dispatcher: driverToDispatcherBody.dispatcherEmail,
+			driversList: driverToDispatcherBody.driversList,
+		});
+	
+		try {
+			const response = await this.request<any[]>({
+				path: "/addDriverToDispatcher",
+				method: "POST",
+				headers: {
+					"Content-Type": "application/x-www-form-urlencoded",
+				},
+				body: params,
+			});
+		} catch (error) {
+			console.error("Error:", error);
+		}
+	}
+	async removeDriverToDispatcher(driverToDispatcherBody: {
+		dispatcherEmail: string;
+		driversList: string;
+	}) {
+		const params = new URLSearchParams({
+			dispatcher: driverToDispatcherBody.dispatcherEmail,
+			driversList: driverToDispatcherBody.driversList,
+		});
+	
+		try {
+			const response = await this.request<any[]>({
+				path: "/removeDriverFromDispatcher",
 				method: "POST",
 				headers: {
 					"Content-Type": "application/x-www-form-urlencoded",

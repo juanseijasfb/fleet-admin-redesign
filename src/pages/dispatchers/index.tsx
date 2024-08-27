@@ -6,6 +6,7 @@ import AddDispatcherForm from "@/components/forms/AddDispatchForm";
 import AssignedDriver from "@/components/forms/AssignedDriver";
 import { useDisableDispatch, useEnableDispatch } from "@/hooks/api/useChangeStatusDispatch";
 import useCreateDispatch from "@/hooks/api/useCreateDispatch";
+import { useAddDriverToDispatcher, useRemoveDriverToDispatcher } from "@/hooks/api/useDriverToDispatcher";
 import {
 	useGetAssignedDriver,
 	useGetUnassignedDriver,
@@ -23,62 +24,112 @@ export default function index() {
 	const { dispatchersInfinite, dispatchersAll, isLoading, fetchNextPage, hasNextPage, refetchDispatchers } = useGetDispatchers({
 		search: debounced,
 	});
-	const [selectedDispatchId, setSelectedDispatchId] = useState<number>(0);
+	const {addDriverToDispatcher, isPendingAssignedDriver} = useAddDriverToDispatcher(() => modalAssDriver.onClose());
+	const {removeDriverToDispatcher, isPendingRemoveDriver} = useRemoveDriverToDispatcher(() => modalAssDriver.onClose());
+	const [selectedDispatchId, setSelectedDispatchId] = useState<string>("0");
 	const [dispatchName, setDispatchName] = useState("");
 	const { assignedDriver, isLoadingAssigned, refetchAssignedDriver } = useGetAssignedDriver(selectedDriverEmail);
-	const { unassignedDriver, isLoadingUnassigned } = useGetUnassignedDriver(selectedDriverEmail);
-	const { disableDispatch } = useDisableDispatch(selectedDispatchId);
-	const { enableDispatch } = useEnableDispatch(selectedDispatchId);
+	const { unassignedDriver, isLoadingUnassigned, refecthUnassignedDriver } = useGetUnassignedDriver(selectedDriverEmail);
+	const { disableDispatch } = useDisableDispatch(() => toast.success('Disabled successfully'));
+	const { enableDispatch } = useEnableDispatch(() => toast.success('Enabled successfully'));
 	const modal = useDisclosure();
 	const modalAssDriver = useDisclosure();
-	const [optionSelected, setOptionSelect] = useState<string>();
+	const [isDisable, setIsDisable] = useState<boolean>(false);
+	const [isEnable, setIsEnable] = useState<boolean>(false);
+	const [btnMultiAction, setBtnMultiAction] = useState<boolean>(false);
+	const [selectedIds, setSelectedIds] = useState<number[]>([])
+	const [driversToDispatcherRemove ,setDriversToDispatchRemove] = useState<string>("");
+	const [driversToDispatcher ,setDriversToDispatch] = useState<string>("");
 	const { createDispatch, isPending } = useCreateDispatch(() => {
 		modal.onClose();
 	});
 
-	const handleAction = (dispatcher: Dispatcher[], optionSelect: string) => {
-		setOptionSelect(optionSelect);
+	const handleAction = (optionSelect: string, dispatcher?: Dispatcher[]) => {
 		switch (optionSelect) {
 			case "disable":
-				setSelectedDispatchId(dispatcher.map((d) => d.id)[0]);
+				setIsDisable(true);
+				if(dispatcher){
+					setSelectedDispatchId(dispatcher.map((d) => d.id.toString())[0]);
+				}
 				break;
 			case "enable":
-				setSelectedDispatchId(dispatcher.map((d) => d.id)[0]);
+				setIsEnable(true);
+				if(dispatcher){
+					setSelectedDispatchId(dispatcher.map((d) => d.id.toString())[0]);
+				}
 				break;
 			case "assignDriver":
-				setDispatchName(`${dispatcher[0].firstName} ${dispatcher[0].lastName}`);
-				setSelectedDriverEmail(dispatcher[0].email);
+				
+				const listDispatcher = selectedIds
+				.map(id => dispatchersAll?.find(d => d.id === id)?.email)
+				.filter(email => email !== undefined);
+				
+				console.log(listDispatcher.join(','))
+				if (listDispatcher) {
+					console.log(listDispatcher)
+				}
+				if(dispatcher){
+					setDispatchName(`${dispatcher[0].firstName} ${dispatcher[0].lastName}`);
+					setSelectedDriverEmail(dispatcher[0].email);
+				}
+				refetchAssignedDriver();
+				refecthUnassignedDriver();
 				modalAssDriver.onOpen();
+				
 				break;
 			default:
 				break;
 		}
 	};
-	useEffect(() => {
-		switch (optionSelected) {
-			case "disable":
-				disableDispatch();
-				refetchDispatchers();
-				break;
-			case "enable":
-				enableDispatch();
-				refetchDispatchers();
-				break;
-			default:
-				refetchDispatchers();
-				break;
-		}
-		setOptionSelect("");
-		setSelectedDispatchId(0);
-	}, [optionSelected, selectedDispatchId]);
+
 	useEffect(() => {
 		refetchAssignedDriver();
 	}, [setDispatchName,selectedDriverEmail]);
-	const handleAssignedDriverSubmit = (values: string[]) => {
-		console.log(values);
-    modalAssDriver.onClose();
-    toast.success('Driver assigned successfully');
-	};
+
+	useEffect(() => {
+		if (isDisable) {
+			if(selectedIds.some(Number.isNaN)){
+				disableDispatch(dispatchersAll?.map((d) => d.id).join(',') || '0');
+			} else {
+				disableDispatch(selectedIds.length > 0 ? selectedIds.join(',') : selectedDispatchId);
+			}
+		}
+		if (isEnable) {
+			if(selectedIds.some(Number.isNaN)){
+				enableDispatch(dispatchersAll?.map((d) => d.id).join(',') || '0');
+			} else {
+				enableDispatch(selectedIds.length > 0 ? selectedIds.join(',') : selectedDispatchId);
+			}
+		}
+		refetchDispatchers();
+		setSelectedDispatchId("0");
+		setIsDisable(false);
+		setIsEnable(false);
+		setBtnMultiAction(false);
+	}, [isDisable, isEnable])
+
+	useEffect(() => {
+		if(selectedDriverEmail){
+			if(driversToDispatcher){
+				addDriverToDispatcher({dispatcherEmail:selectedDriverEmail, driversList:driversToDispatcher});
+			}
+			if(driversToDispatcherRemove){
+				removeDriverToDispatcher({dispatcherEmail:selectedDriverEmail, driversList:driversToDispatcherRemove});
+			}
+			toast.success('Driver assigned successfully')
+		}
+		setBtnMultiAction(false);
+	}, [driversToDispatcher, driversToDispatcherRemove])
+
+	useEffect(() => {
+		selectedIds.length > 0 || Number.isNaN(selectedIds[0]) ? setBtnMultiAction(true) : setBtnMultiAction(false); 
+	},[selectedIds])
+
+	const handleSaveForm = (values:string[], valuesRemove:string[]) => {
+		setDriversToDispatchRemove(valuesRemove.join(','));
+		setDriversToDispatch(values.join(','));
+	} 
+
 	const dispatchers = dispatchersInfinite?.pages.flatMap(page => page.data) || [];
   
 	return (
@@ -87,8 +138,10 @@ export default function index() {
 				title="Dispatchers"
 				addButtonText="Create Dispatcher"
 				placeholderSearch="Search Dispatcher"
+				multiActionBtn={btnMultiAction}
 				addButtonAction={() => modal.onOpen()}
 				defaultSearch={search}
+				onMultipleSelect={(optionSelect) => handleAction(optionSelect)}
 				onChangeSearch={(e: React.ChangeEvent<HTMLInputElement>) => {
 					handleSearch(e.target.value);
 				}}
@@ -98,9 +151,11 @@ export default function index() {
 					<DispatcherTable
 						isLoading={isLoading}
 						dispatchers={dispatchers ?? []}
-						onMultipleSelect={(e: Dispatcher[], optionSelect:string) => handleAction(e, optionSelect)}
+						onMultipleSelect={(e: Dispatcher[], optionSelect:string) => handleAction(optionSelect, e)}
+						listDispatchersId={(e) => setSelectedIds(e)}
 						fetchNextPage={fetchNextPage}
 						hasNextPage={hasNextPage}
+						showMultipleSelect={btnMultiAction}
 					/>
 				}
 			</div>
@@ -124,10 +179,8 @@ export default function index() {
 				) : (
 					<AssignedDriver
 						onClose={modalAssDriver.onClose}
-						onSubmit={(values) => {
-							handleAssignedDriverSubmit(values);
-						}}
-						isLoading={isLoadingAssigned && isLoadingUnassigned}
+						onSubmit={(values, valuesRemove) => handleSaveForm(values, valuesRemove)}
+						isLoading={isLoadingAssigned && isLoadingUnassigned && isPendingAssignedDriver && isPendingRemoveDriver}
 						dispatcherName={dispatchName}
 						driverAssigned={assignedDriver ?? []}
 						driverUnassigned={unassignedDriver ?? []}

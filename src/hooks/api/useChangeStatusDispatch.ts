@@ -1,27 +1,29 @@
 import ApiService from "@/services/ApiService";
 import { useMutation } from "@tanstack/react-query";
 
-export function useDisableDispatch(dispatcherId: number) {
+export function useDisableDispatch(cb: () => void) {
   const { mutate, isPending, isError } = useMutation({
-    onError: (error) => {
-      console.error(error);
+    onSuccess: () => {
+      cb();
     },
-    mutationFn: async () => {
+    onError: () => {},
+    mutationFn: async (dispatcherId: string) => {
       const api = new ApiService();
-      dispatcherId !== 0 && api.activeDisableDispatch({ dispatcherId, disable:true}); 
+      api.activeDisableDispatch({ dispatcherId, disable:true}); 
     },
   });
 
   return { disableDispatch: mutate, isPending, isError };
 }
-export function useEnableDispatch(dispatcherId: number) {
+export function useEnableDispatch(cb: () => void) {
   const { mutate, isPending, isError } = useMutation({
-    onError: (error) => {
-      console.error(error);
+    onSuccess: () => {
+      cb();
     },
-    mutationFn: async () => {
+    onError: () => {},
+    mutationFn: async (dispatcherId: string) => {
       const api = new ApiService();
-      dispatcherId !== 0 && api.activeDisableDispatch({ dispatcherId , disable:false}); 
+      api.activeDisableDispatch({ dispatcherId , disable:false}); 
     },
   });
 

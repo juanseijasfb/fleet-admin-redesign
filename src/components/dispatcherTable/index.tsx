@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
 	Table,
 	TableHeader,
@@ -30,19 +30,24 @@ const statusColorMap: Record<DriverStatus, "success" | "danger"> = {
 interface DispatcherTableProps {
 	dispatchers: Dispatcher[];
 	onMultipleSelect: (selected: Dispatcher[], optionSelect: string) => void;
+	listDispatchersId: (id: number[]) => void;
 	isLoading: boolean;
 	fetchNextPage: () => void,
 	hasNextPage: boolean,
+	showMultipleSelect: boolean
 }
 
 export default function DispatcherTable({
 	dispatchers,
 	onMultipleSelect,
+	listDispatchersId,
 	isLoading,
 	fetchNextPage,
 	hasNextPage,
+	showMultipleSelect,
 }: DispatcherTableProps) {
-
+	const [modeSelectionTable, setModeSelectionTable] = useState<boolean>(showMultipleSelect);
+	const [selectionTable, setSelectionTable] = useState<string[]>([]);
 	const renderCell = React.useCallback(
 		(dispatcher: Dispatcher, columnKey: ColumnKeys) => {
 			const cellValue = dispatcher[columnKey as keyof Dispatcher];
@@ -107,6 +112,18 @@ export default function DispatcherTable({
 		},
 		[],
 	);
+	const handlerSelectionChange = (e: any) => {
+		const arrFromSet = [...e]
+		e.size === 0 ? setSelectionTable([]) : setSelectionTable(arrFromSet);
+    };
+	
+	useEffect(() => {
+		setModeSelectionTable(showMultipleSelect)
+	},[showMultipleSelect])
+
+	useEffect(() => {
+		listDispatchersId(selectionTable.map(str => parseInt(str)))
+	},[selectionTable])
 
 	return (
 		<InfiniteScroll 
@@ -121,6 +138,10 @@ export default function DispatcherTable({
 			style={{ paddingBottom: "10px" }}>
 			<Table
 				aria-label="Example table with custom cells"
+				selectionMode={"multiple"}
+				selectionBehavior={modeSelectionTable ? "toggle" : "replace"}
+				onRowAction={() => setModeSelectionTable(!modeSelectionTable)}
+				onSelectionChange={(e) => handlerSelectionChange(e)}
 			>
 				<TableHeader columns={columns}>
 					{(column) => (
@@ -138,7 +159,7 @@ export default function DispatcherTable({
 					items={dispatchers}
 				>
 					{(item) => (
-						<TableRow key={item.id}>
+						<TableRow key={item.id} className="cursor-pointer">
 							{(columnKey) => (
 								<TableCell>
 									{renderCell(item, columnKey as ColumnKeys)}

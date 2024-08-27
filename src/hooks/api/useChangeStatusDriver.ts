@@ -1,27 +1,29 @@
 import ApiService from "@/services/ApiService";
 import { useMutation } from "@tanstack/react-query";
 
-export function useDisableDriver(driversId: number) {
+export function useDisableDriver(cb: () => void) {
   const { mutate, isPending, isError } = useMutation({
-    onError: (error) => {
-      console.error(error);
+    onSuccess: () => {
+      cb();
     },
-    mutationFn: async () => {
+    onError: () => {},
+    mutationFn: async (driversId:string) => {
       const api = new ApiService();
-      driversId !== 0 && api.activeDisableDriver({ driversId, disable:true}); 
+      api.activeDisableDriver({ driversId, disable:true}); 
     },
   });
 
   return { disableDriver: mutate, isPending, isError };
 }
-export function useEnableDriver(driversId: number) {
+export function useEnableDriver(cb: () => void) {
   const { mutate, isPending, isError } = useMutation({
-    onError: (error) => {
-      console.error(error);
+    onSuccess: () => {
+      cb();
     },
-    mutationFn: async () => {
+    onError: () => {},
+    mutationFn: async (driversId:string) => {
       const api = new ApiService();
-      driversId !== 0 && api.activeDisableDriver({ driversId , disable:false}); 
+      api.activeDisableDriver({ driversId , disable:false}); 
     },
   });
 

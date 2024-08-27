@@ -15,11 +15,15 @@ export interface AddRestrictionDriverValues {
 	typeValue: string;
 	validUntil?: string;
 }
+export interface ValuesFormAddRestriction extends Omit<AddRestrictionDriverValues, 'subjectValue'> {
+    subjectValue: string[];
+}
+
 interface AddRestrictionDriverProps {
 	onClose: () => void;
-	onSubmit: (values: AddRestrictionDriverValues) => void;
+	onSubmit: (values: ValuesFormAddRestriction) => void;
 	isLoading?: boolean;
-	initialValues?: AddRestrictionDriverValues;
+	initialValues?: ValuesFormAddRestriction;
 	driverList: { label: string; value: string }[];
 }
 
@@ -50,7 +54,7 @@ export default function AddRestrictionDriverForm({
 			subject: "D",
 			state: initialValues?.state || "",
 			type: initialValues?.type || "ST",
-			subjectValue: initialValues?.subjectValue || "",
+			subjectValue: initialValues?.subjectValue || [""],
 			typeValue: initialValues?.typeValue || "",
 			validUntil: "2099-12-31 00:00:00",
 		},
@@ -67,15 +71,16 @@ export default function AddRestrictionDriverForm({
 		}
 		setFieldValue("typeValue", "");
 	}, [values.state, isLoadingCities, isError, cities]);
-
+	
 	return (
 		<div className="flex flex-col gap-8 py-4">
 			<h3 className="font-bold text-2xl pt-2">City and States Restrictions</h3>
 			<div>
 				<Selecting
 					options={driverList}
-					onChange={(e) => setFieldValue("subjectValue", e?.value)}
+					onChange={(e) => setFieldValue("subjectValue", e.map((e) => e.value))}
 					placeholder="Select Driver"
+					isMulti={true}
 				/>
 				{errors.subjectValue && (
 					<span className="text-red-500 text-xs leading-3">

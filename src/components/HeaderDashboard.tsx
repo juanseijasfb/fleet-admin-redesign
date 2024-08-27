@@ -1,4 +1,4 @@
-import { Button, Input } from "@nextui-org/react";
+import { Button, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger, Input } from "@nextui-org/react";
 import { useRouter } from "next/router";
 import React from "react";
 import {
@@ -15,10 +15,12 @@ interface HeaderDashboardProps {
 	placeholderSearch?: string;
 	onChangeSearch?: (e: React.ChangeEvent<HTMLInputElement>) => void;
 	showButton?: boolean;
+	multiActionBtn?: boolean;
 	actionButton?: () => void;
 	addButtonRestriction?: () => void;
 	actionButtonText?: string;
 	defaultSearch?: string;
+	onMultipleSelect: (optionSelect: string) => void;
 }
 export default function HeaderDashboard({
 	title,
@@ -29,14 +31,33 @@ export default function HeaderDashboard({
 	defaultSearch,
 	showButton,
 	actionButton,
+	multiActionBtn,
 	addButtonRestriction,
 	actionButtonText,
+	onMultipleSelect
 }: HeaderDashboardProps) {
 	const router = useRouter();
 	return (
 		<div className="md:h-20 px-10 flex md:flex-row flex-col gap-8 md:gap-0 justify-between items-center">
 			<h1 className="font-bold text-2xl">{title}</h1>
-			<div className={"flex gap-4"}>
+			<div className={"flex items-center gap-4"}>
+				{multiActionBtn && (
+					<Dropdown>
+					<DropdownTrigger>
+						<Button className="min-w-24 max-h-8" color="primary" variant="flat">
+							Multi Action
+						</Button>
+					</DropdownTrigger>
+					<DropdownMenu>
+						<DropdownItem onClick={() => onMultipleSelect("enable")}>
+							Enable
+						</DropdownItem>
+						<DropdownItem onClick={() => onMultipleSelect("disable")}>
+							Disable
+						</DropdownItem>
+					</DropdownMenu>
+				</Dropdown>
+				)}
 				{showButton && (
 					<Button
 						color="primary"
