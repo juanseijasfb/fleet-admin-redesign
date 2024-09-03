@@ -97,7 +97,6 @@ export default function AddDriverForm({
 			/>
 			<Select
 				size="lg"
-				value={"V"}
 				onChange={handleChange("trailerType")}
 				isValid={!errors.trailerType}
 				errorMessage={errors.trailerType}
