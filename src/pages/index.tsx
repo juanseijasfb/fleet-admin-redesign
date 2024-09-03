@@ -10,11 +10,12 @@ export default function Home() {
 	return (
 		<LayoutDashboard>
 			<Button
+				className="hidden"
 				onClick={() => {
 					window.location.href = "/api/auth/login";
 				}}
 			>
-				Login
+				Loginss
 			</Button>
 		</LayoutDashboard>
 	);
