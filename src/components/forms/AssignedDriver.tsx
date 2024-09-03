@@ -50,7 +50,7 @@ export default function AssignedDriver({
       <Select
         value={selectedIds}
         isMulti
-        options={totalDriversList}
+        options={totalDriversList.sort((a, b) => a.label.localeCompare(b.label))}
         onChange={(newValue, actionMeta) => handleChangeSelect(newValue, actionMeta)}
       />
       <div className="flex justify-end gap-4">
