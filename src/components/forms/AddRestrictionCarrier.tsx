@@ -47,7 +47,7 @@ export default function AddRestrictionCarrier({
 
   return (
     <div className="flex flex-col gap-8 py-4">
-      <h3 className="font-bold pt-2 ">Restriction to Carrier {carrierSelected?.carrier}</h3>
+      <h3 className="font-bold text-2xl">Restriction to Carrier {carrierSelected?.carrier}</h3>
       <div>
         <Select
           size="lg"

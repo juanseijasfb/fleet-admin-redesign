@@ -12,6 +12,8 @@ import useSearch from "@/hooks/useSearch";
 import { useGetBrokerList } from "@/hooks/api/useGetBroker";
 import toast from "react-hot-toast";
 import { useAddRestriccion } from "@/hooks/api/useChangeRestrictions";
+import ShowRestrictions from "@/components/forms/ShowRestriccions";
+import { GetRestriccionResponseAPI } from "@/utils/types";
 
 export default function index() {
 	const { listBroker, isLoadingBroker } = useGetBrokerList();
@@ -21,13 +23,22 @@ export default function index() {
 	const { addRestriccion, addRPending } = useAddRestriccion(() => { modalRestriction.onClose(); toast.success('Restriction added successfully');}, "carrier");
 	const modal = useDisclosure();
 	const modalRestriction = useDisclosure();
+	const modalShowRestrictions = useDisclosure();
 	const [carrierSelected, setCarrierSelected] = useState<CarrierTableValues>();
 	const { createCarrier, isPending } = useCreateCarrier(() => {
 		modal.onClose();
 	});
-	const handlerModalRestriction = (e: any) => {
-		setCarrierSelected(e[0]);
-		modalRestriction.onOpen();
+	const handlerModalRestriction = (e: any, optionSelect:string) => {
+		switch (optionSelect) {
+			case "add":
+				setCarrierSelected(e[0]);
+				modalRestriction.onOpen();
+				break;
+			case "show":
+				setCarrierSelected(e[0]);
+				modalShowRestrictions.onOpen();
+		}
+	
 	};
 	const carriers = carriersInfinite?.pages.flatMap(page => page.data) || [];
 	return (
@@ -49,7 +60,7 @@ export default function index() {
 					<CarrierTable
 						isLoading={isLoading}
 						carriers={carriers ?? []}
-						onMultipleSelect={(e) => handlerModalRestriction(e)}
+						onMultipleSelect={(e, optionSelect) => handlerModalRestriction(e, optionSelect)}
 						fetchNextPage={fetchNextPage}
 						hasNextPage={hasNextPage}
 					/>
@@ -72,6 +83,14 @@ export default function index() {
 					onSubmit={(e) => addRestriccion({subject: e.subject, type: e.type,subjectValue: e.subjectValue,typeValue: e.typeValue,validUntil: e.validUntil})}
 					carrierSelected={carrierSelected}
 					listBroker={listBroker}
+				/>
+			</ModalForm>
+			<ModalForm isOpen={modalShowRestrictions.isOpen} onOpenChange={modalShowRestrictions.onOpenChange}>
+				<ShowRestrictions
+					onClose={modalShowRestrictions.onClose}
+					onSubmit={(e: GetRestriccionResponseAPI) => console.log({subject: e.Subject,type: e.Type,subjectValue: e.SubjectValue,typeValue: e.TypeValue})}
+					restriccionDriverList={[]}
+					nameDriver={carrierSelected && carrierSelected?.carrier || ""}
 				/>
 			</ModalForm>
 		</LayoutDashboard>

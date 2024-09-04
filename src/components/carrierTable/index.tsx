@@ -23,7 +23,7 @@ import InfiniteScroll from "react-infinite-scroll-component";
 
 interface CarrierTableProps {
 	carriers: Carrier[];
-	onMultipleSelect: (selected: Carrier[]) => void;
+	onMultipleSelect: (selected: Carrier[], optionSelect: string) => void;
 	isLoading?: boolean;
 	fetchNextPage: () => void,
 	hasNextPage: boolean,
@@ -51,8 +51,11 @@ export default function CarrierTable({
 								</Button>
 							</DropdownTrigger>
 							<DropdownMenu>
-								<DropdownItem onClick={() => onMultipleSelect([carrier])}>
-									Add restriction broker
+								<DropdownItem onClick={() => onMultipleSelect([carrier], "show")}>
+									Show broker restrictions 
+								</DropdownItem>
+								<DropdownItem onClick={() => onMultipleSelect([carrier], "add")}>
+									Add broker restriction 
 								</DropdownItem>
 								{/* <DropdownItem>Edit</DropdownItem>
 								<DropdownItem>Delete</DropdownItem> */}
