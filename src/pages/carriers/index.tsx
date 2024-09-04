@@ -37,9 +37,8 @@ export default function index() {
 				addButtonText="Create Carrier"
 				placeholderSearch="Search Carrier"
 				onMultipleSelect={(e) => console.log(e)}
-				onChangeSearch={(e) => {
-					handleSearch(e.target.value);
-				}}
+				onChangeSearch={(e) => handleSearch(e)}
+				dataForAutocomplete={carrierAll?.map(d => ({id: d.mcNumber, firstName: d.carrier})) || []}
 				defaultSearch={search}
 				addButtonAction={() => {
 					modal.onOpen();
