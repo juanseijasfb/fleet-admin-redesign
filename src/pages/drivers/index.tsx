@@ -125,7 +125,8 @@ export default function index() {
 				showButton={selectedKeys === "all" || selectedKeys.size > 0}
 				actionButtonText="Create Restriction"
 				defaultSearch={search}
-				onChangeSearch={(e) => handleSearch(e.target.value)}
+				onChangeSearch={(e: string) => handleSearch(e)}
+				dataForAutocomplete={driversAll?.map(d => ({id: d.id, firstName: d.firstName.split(',')[0]})) || []}
 				multiActionBtn={btnMultiAction}
 				onMultipleSelect={(optionSelect) => handleAction(optionSelect)}
 				addButtonAction={() => {

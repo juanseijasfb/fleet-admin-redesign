@@ -142,9 +142,8 @@ export default function index() {
 				addButtonAction={() => modal.onOpen()}
 				defaultSearch={search}
 				onMultipleSelect={(optionSelect) => handleAction(optionSelect)}
-				onChangeSearch={(e: React.ChangeEvent<HTMLInputElement>) => {
-					handleSearch(e.target.value);
-				}}
+				onChangeSearch={(e: string) => handleSearch(e)}
+				dataForAutocomplete={dispatchersAll?.map(d => ({id: d.id, firstName: d.firstName})) || []}
 			/>
 			<div className="px-10">
 				{

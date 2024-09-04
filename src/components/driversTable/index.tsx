@@ -10,6 +10,7 @@ import {
 	Spinner,
 	divider,
 	Pagination,
+	SortDescriptor,
 } from "@nextui-org/react";
 import {
 	Dropdown,
@@ -50,6 +51,18 @@ export default function DriverTable({
 }: DriverTableProps) {
 	const [modeSelectionTable, setModeSelectionTable] = useState<boolean>(showMultipleSelect);
 	const [selectionTable, setSelectionTable] = useState<string[]>([]);
+	const [sortDescriptor, setSortDescriptor] = React.useState<SortDescriptor>({});
+
+	const sortedItems = React.useMemo(() => {
+		return [...drivers].sort((a: Driver, b: Driver) => {
+		  const first = a[sortDescriptor.column as keyof Driver] as number;
+		  const second = b[sortDescriptor.column as keyof Driver] as number;
+		  const cmp = first < second ? -1 : first > second ? 1 : 0;
+	
+		  return sortDescriptor.direction === "descending" ? -cmp : cmp;
+		});
+	}, [sortDescriptor, drivers]);
+
 	const renderCell = React.useCallback(
 		(driver: Driver, columnKey: ColumnKeys) => {
 			const cellValue = driver[columnKey as keyof Driver];
@@ -160,12 +173,15 @@ export default function DriverTable({
 					selectionBehavior={modeSelectionTable ? "toggle" : "replace"}
 					onRowAction={() => setModeSelectionTable(!modeSelectionTable)}
 					onSelectionChange={(e) => handlerSelectionChange(e)}
+					sortDescriptor={sortDescriptor}
+					onSortChange={setSortDescriptor}
 				>
 					<TableHeader columns={columns}>
 						{(column) => (
 							<TableColumn
 								key={column.uid}
 								align={["actions", "equipment", "status"].includes(column.uid) ? "center" : "start"}
+								allowsSorting={column.uid !== "equipment"}
 							>
 								{column.name}
 							</TableColumn>
@@ -174,7 +190,7 @@ export default function DriverTable({
 					<TableBody
 						loadingState={isLoading ? "loading" : "idle"}
 						loadingContent={<Spinner />}
-						items={drivers}
+						items={sortedItems}
 					>
 						{(item) => (
 							<TableRow key={item.id} className="cursor-pointer">

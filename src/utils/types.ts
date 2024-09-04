@@ -96,3 +96,7 @@ export type OptionSelect = {
   label: string;
   value: string;
 }
+export type DataSelectAutocomplete = {
+	id: number;
+    firstName: string;
+}

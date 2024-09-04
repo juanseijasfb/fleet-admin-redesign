@@ -8,6 +8,7 @@ import {
 	TableCell,
 	Chip,
 	Spinner,
+	SortDescriptor,
 } from "@nextui-org/react";
 import {
 	Dropdown,
@@ -48,6 +49,18 @@ export default function DispatcherTable({
 }: DispatcherTableProps) {
 	const [modeSelectionTable, setModeSelectionTable] = useState<boolean>(showMultipleSelect);
 	const [selectionTable, setSelectionTable] = useState<string[]>([]);
+	const [sortDescriptor, setSortDescriptor] = React.useState<SortDescriptor>({});
+
+	const sortedItems = React.useMemo(() => {
+		return [...dispatchers].sort((a: Dispatcher, b: Dispatcher) => {
+		  const first = a[sortDescriptor.column as keyof Dispatcher] as number;
+		  const second = b[sortDescriptor.column as keyof Dispatcher] as number;
+		  const cmp = first < second ? -1 : first > second ? 1 : 0;
+	
+		  return sortDescriptor.direction === "descending" ? -cmp : cmp;
+		});
+	}, [sortDescriptor, dispatchers]);
+
 	const renderCell = React.useCallback(
 		(dispatcher: Dispatcher, columnKey: ColumnKeys) => {
 			const cellValue = dispatcher[columnKey as keyof Dispatcher];
@@ -142,12 +155,15 @@ export default function DispatcherTable({
 				selectionBehavior={modeSelectionTable ? "toggle" : "replace"}
 				onRowAction={() => setModeSelectionTable(!modeSelectionTable)}
 				onSelectionChange={(e) => handlerSelectionChange(e)}
+				sortDescriptor={sortDescriptor}
+				onSortChange={setSortDescriptor}
 			>
 				<TableHeader columns={columns}>
 					{(column) => (
 						<TableColumn
 							key={column.uid}
 							align={column.uid === "actions" ? "center" : "start"}
+							allowsSorting={column.uid !== "actions"}
 						>
 							{column.name}
 						</TableColumn>
@@ -156,7 +172,7 @@ export default function DispatcherTable({
 				<TableBody
 					loadingState={isLoading ? "loading" : "idle"}
 					loadingContent={<Spinner size="sm" color="primary" />}
-					items={dispatchers}
+					items={sortedItems}
 				>
 					{(item) => (
 						<TableRow key={item.id} className="cursor-pointer">
