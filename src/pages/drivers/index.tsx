@@ -18,22 +18,35 @@ import {
 	useEnableDriver,
 } from "@/hooks/api/useChangeStatusDriver";
 import useSearch from "@/hooks/useSearch";
-import { useAddRestriccion, useRemoveRestriccion } from "@/hooks/api/useChangeRestrictions";
+import {
+	useAddRestriccion,
+	useRemoveRestriccion,
+} from "@/hooks/api/useChangeRestrictions";
 import { useGetRestriccionDriver } from "@/hooks/api/useGetRestriccionDriver";
 import ShowRestrictions from "@/components/forms/ShowRestriccions";
-import toast from 'react-hot-toast';
+import toast from "react-hot-toast";
+import { ReactSearchAutocomplete } from "react-search-autocomplete";
 
 export default function index() {
 	const { search, handleSearch, debounced } = useSearch("drivers");
 
-	const { driversInfinite, driversAll, isLoading, fetchNextPage, hasNextPage, refetchDrivers } = useGetDrivers(debounced);
+	const {
+		driversInfinite,
+		driversAll,
+		isLoading,
+		fetchNextPage,
+		hasNextPage,
+		refetchDrivers,
+	} = useGetDrivers(debounced);
 	const [selectedDriverId, setSelectedDriverId] = useState<string>("0");
 	const [selectedDriverName, setSelectedDriverName] = useState<string>("");
-	const [selectedDriver, setSelectedDriver] = useState<Driver[]>(
-		[],
+	const [selectedDriver, setSelectedDriver] = useState<Driver[]>([]);
+	const { disableDriver } = useDisableDriver(() =>
+		toast.success("Disabled successfully"),
 	);
-	const { disableDriver } = useDisableDriver(() => toast.success('Disabled successfully'));
-	const { enableDriver } = useEnableDriver(() => toast.success('Enabled successfully'));
+	const { enableDriver } = useEnableDriver(() =>
+		toast.success("Enabled successfully"),
+	);
 	const [selectedKeys, setSelectedKeys] = React.useState<Selection>(new Set());
 	const modal = useDisclosure();
 	const modalUpdate = useDisclosure();
@@ -42,13 +55,23 @@ export default function index() {
 	const { createDriver, isPending } = useCreateDriver(() => {
 		modal.onClose();
 	});
-	const [selectedIds, setSelectedIds] = useState<number[]>([])
+	const [selectedIds, setSelectedIds] = useState<number[]>([]);
 	const [isDisable, setIsDisable] = useState<boolean>(false);
 	const [isEnable, setIsEnable] = useState<boolean>(false);
 	const [btnMultiAction, setBtnMultiAction] = useState<boolean>(false);
-	const { addRestriccion, addRPending } = useAddRestriccion(() => { modalRestriction.onClose(); toast.success('Restriction added successfully');}, "driver")
-	const { removeRestriccion, isPendingRemove } = useRemoveRestriccion(() => { modalShowRestrictions.onClose();toast.success('Restriction removed successfully')});
-	const { restriccionsDrivers, isLoadingRestriccions, refetchRestriccionsDrivers } = useGetRestriccionDriver(selectedDriverName);
+	const { addRestriccion, addRPending } = useAddRestriccion(() => {
+		modalRestriction.onClose();
+		toast.success("Restriction added successfully");
+	}, "driver");
+	const { removeRestriccion, isPendingRemove } = useRemoveRestriccion(() => {
+		modalShowRestrictions.onClose();
+		toast.success("Restriction removed successfully");
+	});
+	const {
+		restriccionsDrivers,
+		isLoadingRestriccions,
+		refetchRestriccionsDrivers,
+	} = useGetRestriccionDriver(selectedDriverName);
 
 	const handleAction = (optionSelect: string, e?: Driver[]) => {
 		switch (optionSelect) {
@@ -75,22 +98,28 @@ export default function index() {
 	};
 
 	useEffect(() => {
-		selectedIds.length > 0 || Number.isNaN(selectedIds[0]) ? setBtnMultiAction(true) : setBtnMultiAction(false); 
-	},[selectedIds])
+		selectedIds.length > 0 || Number.isNaN(selectedIds[0])
+			? setBtnMultiAction(true)
+			: setBtnMultiAction(false);
+	}, [selectedIds]);
 
 	useEffect(() => {
 		if (isDisable) {
-			if(selectedIds.some(Number.isNaN)){
-				disableDriver(driversAll?.map((d) => d.id).join(',') || '0');
+			if (selectedIds.some(Number.isNaN)) {
+				disableDriver(driversAll?.map((d) => d.id).join(",") || "0");
 			} else {
-				disableDriver(selectedIds.length > 1 ? selectedIds.join(',') : selectedDriverId);
+				disableDriver(
+					selectedIds.length > 1 ? selectedIds.join(",") : selectedDriverId,
+				);
 			}
 		}
 		if (isEnable) {
-			if(selectedIds.some(Number.isNaN)){
-				enableDriver(driversAll?.map((d) => d.id).join(',') || '0');
+			if (selectedIds.some(Number.isNaN)) {
+				enableDriver(driversAll?.map((d) => d.id).join(",") || "0");
 			} else {
-				enableDriver(selectedIds.length > 1 ? selectedIds.join(',') : selectedDriverId);
+				enableDriver(
+					selectedIds.length > 1 ? selectedIds.join(",") : selectedDriverId,
+				);
 			}
 		}
 		refetchDrivers();
@@ -98,22 +127,36 @@ export default function index() {
 		setIsDisable(false);
 		setIsEnable(false);
 		setBtnMultiAction(false);
-	}, [isDisable, isEnable])
+	}, [isDisable, isEnable]);
 
-	const handleSubmit = (e:any) => {
-		if(e.subjectValue.length > 1){
-			e.subjectValue.forEach((item:any) => {
-				addRestriccion({subject: e.subject,state: e.state, type: e.type,subjectValue: item,typeValue: e.typeValue,validUntil: e.validUntil})
-			})
-		} else if(e.subjectValue.length === 0){
-			addRestriccion({subject: e.subject,state: e.state, type: e.type,subjectValue: e.subjectValue[0],typeValue: e.typeValue,validUntil: e.validUntil})
+	const handleSubmit = (e: any) => {
+		if (e.subjectValue.length > 1) {
+			for (const i of e.subjectValue) {
+				addRestriccion({
+					subject: e.subject,
+					state: e.state,
+					type: e.type,
+					subjectValue: i,
+					typeValue: e.typeValue,
+					validUntil: e.validUntil,
+				});
+			}
+		} else if (e.subjectValue.length === 0) {
+			addRestriccion({
+				subject: e.subject,
+				state: e.state,
+				type: e.type,
+				subjectValue: e.subjectValue[0],
+				typeValue: e.typeValue,
+				validUntil: e.validUntil,
+			});
 		}
-	}
+	};
 
-	const drivers = driversInfinite?.pages.flatMap(page => page.data) || [];
+	const drivers = driversInfinite?.pages.flatMap((page) => page.data) || [];
 	const driversList = drivers?.map((e) => ({
-		label: e.firstName.replace(/,/g," "),
-		value: e.firstName
+		label: e.firstName?.replace(/,/g, " "),
+		value: e.firstName,
 	}));
 
 	return (
@@ -124,9 +167,40 @@ export default function index() {
 				placeholderSearch="Search Driver"
 				showButton={selectedKeys === "all" || selectedKeys.size > 0}
 				actionButtonText="Create Restriction"
-				defaultSearch={search}
-				onChangeSearch={(e: string) => handleSearch(e)}
-				dataForAutocomplete={driversAll?.map(d => ({id: d.id, firstName: d.firstName.split(',')[0]})) || []}
+				searchBox={
+					<ReactSearchAutocomplete
+						autoFocus={false}
+						onFocus={(e: any) => console.log(e)}
+						className="cursor-pointer"
+						styling={{
+							border: "none",
+							borderRadius: "12px",
+							backgroundColor: "rgb(244 244 245)",
+							boxShadow: "rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;",
+							color: "#000",
+						}}
+						placeholder={"Search Driver"}
+						items={driversAll || []}
+						resultStringKeyName="firstName"
+						onSelect={(e) => {
+							handleSearch(e.firstName);
+						}}
+						formatResult={(item) =>
+							item && (
+								<div>
+									<div className="flex items-center gap-2">
+										<span className="text-sm ">{item.firstName}</span>
+									</div>
+									<span className="text-xs text-gray-500">{item.email}</span>
+								</div>
+							)
+						}
+						onClear={(e: any) => handleSearch("")}
+						fuseOptions={{
+							keys: ["firstName", "lastName", "email", "mcNumber", "carrier"],
+						}}
+					/>
+				}
 				multiActionBtn={btnMultiAction}
 				onMultipleSelect={(optionSelect) => handleAction(optionSelect)}
 				addButtonAction={() => {
@@ -191,13 +265,23 @@ export default function index() {
 					isLoading={addRPending}
 				/>
 			</ModalForm>
-			<ModalForm isOpen={modalShowRestrictions.isOpen} onOpenChange={modalShowRestrictions.onOpenChange}>
+			<ModalForm
+				isOpen={modalShowRestrictions.isOpen}
+				onOpenChange={modalShowRestrictions.onOpenChange}
+			>
 				<ShowRestrictions
 					onClose={modalShowRestrictions.onClose}
-					onSubmit={(e: GetRestriccionResponseAPI) => removeRestriccion({subject: e.Subject,type: e.Type,subjectValue: e.SubjectValue,typeValue: e.TypeValue})}
+					onSubmit={(e: GetRestriccionResponseAPI) =>
+						removeRestriccion({
+							subject: e.Subject,
+							type: e.Type,
+							subjectValue: e.SubjectValue,
+							typeValue: e.TypeValue,
+						})
+					}
 					isLoading={isPendingRemove}
 					restriccionDriverList={restriccionsDrivers ?? []}
-					nameDriver={selectedDriverName.replace(/,/g," ")}
+					nameDriver={selectedDriverName.replace(/,/g, " ")}
 				/>
 			</ModalForm>
 		</LayoutDashboard>

@@ -48,10 +48,29 @@ export default class ApiService {
 		return response.data as T;
 	}
 
-	getDrivers = async ({ search }: { search?: string }) => {
+	getDrivers = async ({ search }: { search?: string }): Promise<Driver[]> => {
 		const params = new URLSearchParams();
 		if (search) {
 			params.append("driver", search);
+			const driversResponse = await this.request<DriverResponseAPI>({
+				path: `/getDriverInfo?${params.toString()}`,
+				method: "GET",
+			});
+			return [
+				{
+					id: driversResponse.driverId,
+					firstName: driversResponse.fullName,
+					lastName: driversResponse.fullName,
+					email: driversResponse.email,
+					carrier: driversResponse.Carrier,
+					mcNumber: driversResponse.MCNumber,
+					equipment: driversResponse.Equipment,
+					status: driversResponse.enabled
+						? DriverStatus.Active
+						: DriverStatus.Inactive,
+					weight: driversResponse.maxWeight,
+				},
+			];
 		}
 
 		const driversResponse = await this.request<DriverResponseAPI[]>({
@@ -304,7 +323,6 @@ export default class ApiService {
 		driversId: string;
 		disable: boolean;
 	}) {
-
 		const params = new URLSearchParams();
 		params.append("driversId", disableDriverBody.driversId);
 
@@ -355,7 +373,7 @@ export default class ApiService {
 			dispatcher: driverToDispatcherBody.dispatcherEmail,
 			driversList: driverToDispatcherBody.driversList,
 		});
-	
+
 		try {
 			const response = await this.request<any[]>({
 				path: "/addDriverToDispatcher",
@@ -377,7 +395,7 @@ export default class ApiService {
 			dispatcher: driverToDispatcherBody.dispatcherEmail,
 			driversList: driverToDispatcherBody.driversList,
 		});
-	
+
 		try {
 			const response = await this.request<any[]>({
 				path: "/removeDriverFromDispatcher",
@@ -392,22 +410,21 @@ export default class ApiService {
 		}
 	}
 	async addRestriccionDriver(addRestriccionBody: {
-		subject:string,
-		state?:string,
-        type:string,
-        subjectValue:string,
-        typeValue:string,
-        validUntil?:string
-	}){
-		
+		subject: string;
+		state?: string;
+		type: string;
+		subjectValue: string;
+		typeValue: string;
+		validUntil?: string;
+	}) {
 		const bodyCustom = {
 			subject: addRestriccionBody.subject,
 			type: addRestriccionBody.type,
 			subjectValue: addRestriccionBody.subjectValue,
 			typeValue: addRestriccionBody.typeValue + addRestriccionBody.state,
-			validUntil: addRestriccionBody.validUntil
-		}
-		
+			validUntil: addRestriccionBody.validUntil,
+		};
+
 		try {
 			await new Promise((resolve) => setTimeout(resolve, 1000));
 			const response = await this.request<any[]>({
@@ -415,10 +432,10 @@ export default class ApiService {
 				method: "POST",
 				body: JSON.stringify([bodyCustom]),
 				headers: {
-					'Content-Type': 'application/json'
-				}
-			})
-			console.log({mensaje: "Restriccion agregada exitosamente"});
+					"Content-Type": "application/json",
+				},
+			});
+			console.log({ mensaje: "Restriccion agregada exitosamente" });
 			return response;
 		} catch (error) {
 			console.error("Error:", error);
@@ -431,8 +448,7 @@ export default class ApiService {
 		subjectValue: string;
 		typeValue: string;
 		validUntil?: string;
-	}){
-		
+	}) {
 		try {
 			await new Promise((resolve) => setTimeout(resolve, 1000));
 			const response = await this.request<any[]>({
@@ -440,54 +456,57 @@ export default class ApiService {
 				method: "GET",
 				body: JSON.stringify(addRestriccionCarrierBody),
 				headers: {
-					'Content-Type': 'application/json'
-				}
-			})
-			console.log({mensaje: "Restriccion agregada exitosamente"});
+					"Content-Type": "application/json",
+				},
+			});
+			console.log({ mensaje: "Restriccion agregada exitosamente" });
 			return response;
 		} catch (error) {
 			console.error("Error:", error);
 		}
 	}
-	async getRestriccionDrivers({search} : {search?: string}){ {
-		const params = new URLSearchParams();
-		if (search) {
-			params.append("driver", search);
-		}
+	async getRestriccionDrivers({ search }: { search?: string }) {
+		{
+			const params = new URLSearchParams();
+			if (search) {
+				params.append("driver", search);
+			}
 
-		const getRestriccion = await this.request<GetRestriccionResponseAPI[]>({
-			path: `/getRestrictions?${params.toString()}`,
-			method: "GET",
-		});
-		return getRestriccion;
-		}	
+			const getRestriccion = await this.request<GetRestriccionResponseAPI[]>({
+				path: `/getRestrictions?${params.toString()}`,
+				method: "GET",
+			});
+			return getRestriccion;
+		}
 	}
 
 	async removeRestriccionDriver(addRestriccionBody: {
-		subject:string,
-        type:string,
-        subjectValue:string,
-        typeValue:string,
-	}){
-		try{
+		subject: string;
+		type: string;
+		subjectValue: string;
+		typeValue: string;
+	}) {
+		try {
 			const params = new URLSearchParams({
-				subject:addRestriccionBody.subject,
-				type:addRestriccionBody.type,
-				subjectValue:addRestriccionBody.subjectValue,
-				typeValue:addRestriccionBody.typeValue,
+				subject: addRestriccionBody.subject,
+				type: addRestriccionBody.type,
+				subjectValue: addRestriccionBody.subjectValue,
+				typeValue: addRestriccionBody.typeValue,
 			});
-	
+
 			const removeRestriction = await this.request<any[]>({
 				path: `/removeRestriction?${params.toString()}`,
 				method: "GET",
 				body: params,
-			})
-			const response = {mensaje: "Restriccion eliminada exitosamente", response: removeRestriction}
-			console.log(response)
-	
+			});
+			const response = {
+				mensaje: "Restriccion eliminada exitosamente",
+				response: removeRestriction,
+			};
+			console.log(response);
 		} catch (error) {
 			console.error("Error al eliminar la restricción:", error);
-    		throw new Error("No se pudo eliminar la restricción");
+			throw new Error("No se pudo eliminar la restricción");
 		}
 	}
 }

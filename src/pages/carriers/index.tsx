@@ -7,20 +7,32 @@ import CarrierTable from "@/components/carrierTable";
 import useGetCarriers from "@/hooks/api/useGetCarriers";
 import { Button, useDisclosure } from "@nextui-org/react";
 import React, { useState } from "react";
-import AddRestrictionCarrier, { CarrierTableValues } from "@/components/forms/AddRestrictionCarrier";
+import AddRestrictionCarrier, {
+	CarrierTableValues,
+} from "@/components/forms/AddRestrictionCarrier";
 import useSearch from "@/hooks/useSearch";
 import { useGetBrokerList } from "@/hooks/api/useGetBroker";
 import toast from "react-hot-toast";
 import { useAddRestriccion } from "@/hooks/api/useChangeRestrictions";
 import ShowRestrictions from "@/components/forms/ShowRestriccions";
 import { GetRestriccionResponseAPI } from "@/utils/types";
+import { ReactSearchAutocomplete } from "react-search-autocomplete";
 
 export default function index() {
 	const { listBroker, isLoadingBroker } = useGetBrokerList();
 
 	const { search, debounced, handleSearch } = useSearch("carrier");
-	const { carriersInfinite, carrierAll, isLoading, fetchNextPage, hasNextPage } = useGetCarriers(debounced);
-	const { addRestriccion, addRPending } = useAddRestriccion(() => { modalRestriction.onClose(); toast.success('Restriction added successfully');}, "carrier");
+	const {
+		carriersInfinite,
+		carrierAll,
+		isLoading,
+		fetchNextPage,
+		hasNextPage,
+	} = useGetCarriers(debounced);
+	const { addRestriccion, addRPending } = useAddRestriccion(() => {
+		modalRestriction.onClose();
+		toast.success("Restriction added successfully");
+	}, "carrier");
 	const modal = useDisclosure();
 	const modalRestriction = useDisclosure();
 	const modalShowRestrictions = useDisclosure();
@@ -28,7 +40,7 @@ export default function index() {
 	const { createCarrier, isPending } = useCreateCarrier(() => {
 		modal.onClose();
 	});
-	const handlerModalRestriction = (e: any, optionSelect:string) => {
+	const handlerModalRestriction = (e: any, optionSelect: string) => {
 		switch (optionSelect) {
 			case "add":
 				setCarrierSelected(e[0]);
@@ -38,9 +50,8 @@ export default function index() {
 				setCarrierSelected(e[0]);
 				modalShowRestrictions.onOpen();
 		}
-	
 	};
-	const carriers = carriersInfinite?.pages.flatMap(page => page.data) || [];
+	const carriers = carriersInfinite?.pages.flatMap((page) => page.data) || [];
 	return (
 		<LayoutDashboard>
 			<HeaderDashboard
@@ -49,7 +60,40 @@ export default function index() {
 				placeholderSearch="Search Carrier"
 				onMultipleSelect={(e) => console.log(e)}
 				onChangeSearch={(e) => handleSearch(e)}
-				dataForAutocomplete={carrierAll?.map(d => ({id: d.mcNumber, firstName: d.carrier})) || []}
+				searchBox={
+					<ReactSearchAutocomplete
+						autoFocus={false}
+						onFocus={(e: any) => console.log(e)}
+						className="cursor-pointer"
+						styling={{
+							border: "none",
+							borderRadius: "12px",
+							backgroundColor: "rgb(244 244 245)",
+							boxShadow: "rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;",
+							color: "#000",
+						}}
+						placeholder={"Search Driver"}
+						items={carrierAll || []}
+						resultStringKeyName="carrier"
+						onSelect={(e) => {
+							handleSearch(e.carrier);
+						}}
+						formatResult={(item) =>
+							item && (
+								<div>
+									<div className="flex items-center gap-2">
+										<span className="text-sm ">{item.carrier}</span>
+									</div>
+									<span className="text-xs text-gray-500">{item.mcNumber}</span>
+								</div>
+							)
+						}
+						onClear={(e: any) => handleSearch("")}
+						fuseOptions={{
+							keys: ["carrier", "mcNumber"],
+						}}
+					/>
+				}
 				defaultSearch={search}
 				addButtonAction={() => {
 					modal.onOpen();
@@ -60,7 +104,9 @@ export default function index() {
 					<CarrierTable
 						isLoading={isLoading}
 						carriers={carriers ?? []}
-						onMultipleSelect={(e, optionSelect) => handlerModalRestriction(e, optionSelect)}
+						onMultipleSelect={(e, optionSelect) =>
+							handlerModalRestriction(e, optionSelect)
+						}
 						fetchNextPage={fetchNextPage}
 						hasNextPage={hasNextPage}
 					/>
@@ -80,17 +126,35 @@ export default function index() {
 				<AddRestrictionCarrier
 					onClose={() => modalRestriction.onClose()}
 					isLoading={addRPending}
-					onSubmit={(e) => addRestriccion({subject: e.subject, type: e.type,subjectValue: e.subjectValue,typeValue: e.typeValue,validUntil: e.validUntil})}
+					onSubmit={(e) =>
+						addRestriccion({
+							subject: e.subject,
+							type: e.type,
+							subjectValue: e.subjectValue,
+							typeValue: e.typeValue,
+							validUntil: e.validUntil,
+						})
+					}
 					carrierSelected={carrierSelected}
 					listBroker={listBroker}
 				/>
 			</ModalForm>
-			<ModalForm isOpen={modalShowRestrictions.isOpen} onOpenChange={modalShowRestrictions.onOpenChange}>
+			<ModalForm
+				isOpen={modalShowRestrictions.isOpen}
+				onOpenChange={modalShowRestrictions.onOpenChange}
+			>
 				<ShowRestrictions
 					onClose={modalShowRestrictions.onClose}
-					onSubmit={(e: GetRestriccionResponseAPI) => console.log({subject: e.Subject,type: e.Type,subjectValue: e.SubjectValue,typeValue: e.TypeValue})}
+					onSubmit={(e: GetRestriccionResponseAPI) =>
+						console.log({
+							subject: e.Subject,
+							type: e.Type,
+							subjectValue: e.SubjectValue,
+							typeValue: e.TypeValue,
+						})
+					}
 					restriccionDriverList={[]}
-					nameDriver={carrierSelected && carrierSelected?.carrier || ""}
+					nameDriver={(carrierSelected && carrierSelected?.carrier) || ""}
 				/>
 			</ModalForm>
 		</LayoutDashboard>
