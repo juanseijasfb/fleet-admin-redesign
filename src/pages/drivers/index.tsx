@@ -168,7 +168,7 @@ export default function index() {
 				showButton={selectedKeys === "all" || selectedKeys.size > 0}
 				actionButtonText="Create Restriction"
 				searchBox={
-					<ReactSearchAutocomplete
+					<ReactSearchAutocomplete<Driver>
 						autoFocus={false}
 						onFocus={(e: any) => console.log(e)}
 						className="cursor-pointer"
@@ -185,7 +185,7 @@ export default function index() {
 						onSelect={(e) => {
 							handleSearch(e.firstName);
 						}}
-						formatResult={(item) =>
+						formatResult={(item: Driver) =>
 							item && (
 								<div>
 									<div className="flex items-center gap-2">
@@ -195,7 +195,7 @@ export default function index() {
 								</div>
 							)
 						}
-						onClear={(e: any) => handleSearch("")}
+						onClear={(e: Driver) => handleSearch("")}
 						fuseOptions={{
 							keys: ["firstName", "lastName", "email", "mcNumber", "carrier"],
 						}}

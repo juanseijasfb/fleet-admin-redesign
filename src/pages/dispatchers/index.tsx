@@ -181,7 +181,7 @@ export default function index() {
 				onMultipleSelect={(optionSelect) => handleAction(optionSelect)}
 				onChangeSearch={(e: string) => handleSearch(e)}
 				searchBox={
-					<ReactSearchAutocomplete
+					<ReactSearchAutocomplete<Dispatcher>
 						autoFocus={false}
 						onFocus={(e: any) => console.log(e)}
 						className="cursor-pointer"
@@ -196,7 +196,7 @@ export default function index() {
 						items={dispatchersAll || []}
 						showNoResults={false}
 						resultStringKeyName="firstName"
-						formatResult={(item) =>
+						formatResult={(item: Dispatcher) =>
 							item && (
 								<div>
 									<div className="flex items-center gap-2">
@@ -210,7 +210,7 @@ export default function index() {
 						onSelect={(e) => {
 							handleSearch(e.firstName);
 						}}
-						onClear={(e: any) => handleSearch("")}
+						onClear={(e: Dispatcher) => handleSearch("")}
 						fuseOptions={{
 							keys: ["firstName", "lastName", "email", "mcNumber", "carrier"],
 						}}

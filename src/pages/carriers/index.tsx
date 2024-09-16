@@ -15,7 +15,7 @@ import { useGetBrokerList } from "@/hooks/api/useGetBroker";
 import toast from "react-hot-toast";
 import { useAddRestriccion } from "@/hooks/api/useChangeRestrictions";
 import ShowRestrictions from "@/components/forms/ShowRestriccions";
-import { GetRestriccionResponseAPI } from "@/utils/types";
+import { Carrier, GetRestriccionResponseAPI } from "@/utils/types";
 import { ReactSearchAutocomplete } from "react-search-autocomplete";
 
 export default function index() {
@@ -61,7 +61,7 @@ export default function index() {
 				onMultipleSelect={(e) => console.log(e)}
 				onChangeSearch={(e) => handleSearch(e)}
 				searchBox={
-					<ReactSearchAutocomplete
+					<ReactSearchAutocomplete<Carrier>
 						autoFocus={false}
 						onFocus={(e: any) => console.log(e)}
 						className="cursor-pointer"
@@ -78,7 +78,7 @@ export default function index() {
 						onSelect={(e) => {
 							handleSearch(e.carrier);
 						}}
-						formatResult={(item) =>
+						formatResult={(item: Carrier) =>
 							item && (
 								<div>
 									<div className="flex items-center gap-2">
@@ -88,7 +88,7 @@ export default function index() {
 								</div>
 							)
 						}
-						onClear={(e: any) => handleSearch("")}
+						onClear={(e: Carrier) => handleSearch("")}
 						fuseOptions={{
 							keys: ["carrier", "mcNumber"],
 						}}
