@@ -20,7 +20,7 @@ import {
 import useGetDispatchers from "@/hooks/api/useGetDispatcher";
 import useSearch from "@/hooks/useSearch";
 import { type Dispatcher, DriverUnassignedResponseAPI } from "@/utils/types";
-import { useDisclosure } from "@nextui-org/react";
+import { Selection, useDisclosure } from "@nextui-org/react";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { ReactSearchAutocomplete } from "react-search-autocomplete";
@@ -59,10 +59,13 @@ export default function index() {
 	const [isDisable, setIsDisable] = useState<boolean>(false);
 	const [isEnable, setIsEnable] = useState<boolean>(false);
 	const [btnMultiAction, setBtnMultiAction] = useState<boolean>(false);
+	const [dispatchers, setDispatchers] = useState<Dispatcher[]>([]);
 	const [selectedIds, setSelectedIds] = useState<number[]>([]);
+	const [hasDefaultNextPage, setHasDefaultNextPage] = useState<boolean>(false);
 	const [driversToDispatcherRemove, setDriversToDispatchRemove] =
 		useState<string>("");
 	const [driversToDispatcher, setDriversToDispatch] = useState<string>("");
+	const [statusFilter, setStatusFilter] = useState<Selection>("all");
 	const { createDispatch, isPending } = useCreateDispatch(() => {
 		modal.onClose();
 	});
@@ -161,13 +164,41 @@ export default function index() {
 			: setBtnMultiAction(false);
 	}, [selectedIds]);
 
+	useEffect(() => {
+		if (dispatchersInfinite) {
+				const drivers = dispatchersInfinite.pages.flatMap((page) => page.data) || [];
+				const driversList = drivers.map((e) => ({
+					label: e.firstName?.replace(/,/g, " "),
+					value: e.firstName,
+				}));
+				setDispatchers(drivers);
+		}
+		if(statusFilter !== undefined && dispatchersAll !== undefined && dispatchersInfinite !== undefined) {
+				const filtered = Array.from(statusFilter);
+				const hasBothStatuses = filtered.includes("1") && filtered.includes("2");
+				if (hasBothStatuses) {
+					setDispatchers(dispatchersInfinite.pages.flatMap((page) => page.data));
+					setHasDefaultNextPage(false);
+				} else {
+					filtered.forEach((item) => {
+						if (item === "1") {
+							setDispatchers(dispatchersAll.filter(d => d.status === "Active"));
+							setHasDefaultNextPage(true);
+						}
+						if (item === "2") {
+							setDispatchers(dispatchersAll.filter(d => d.status === "Inactive"));
+							setHasDefaultNextPage(true);
+						}
+					});
+				}
+				
+		}
+	}, [dispatchersInfinite, statusFilter]);
+
 	const handleSaveForm = (values: string[], valuesRemove: string[]) => {
 		setDriversToDispatchRemove(valuesRemove.join(","));
 		setDriversToDispatch(values.join(","));
 	};
-
-	const dispatchers =
-		dispatchersInfinite?.pages.flatMap((page) => page.data) || [];
 
 	return (
 		<LayoutDashboard>
@@ -216,21 +247,20 @@ export default function index() {
 						}}
 					/>
 				}
+				onSelectedFilter={(e) => setStatusFilter(e)}
 			/>
 			<div className="px-10">
-				{
-					<DispatcherTable
-						isLoading={isLoading}
-						dispatchers={dispatchers ?? []}
-						onMultipleSelect={(e: Dispatcher[], optionSelect: string) =>
-							handleAction(optionSelect, e)
-						}
-						listDispatchersId={(e) => setSelectedIds(e)}
-						fetchNextPage={fetchNextPage}
-						hasNextPage={hasNextPage}
-						showMultipleSelect={btnMultiAction}
-					/>
-				}
+				<DispatcherTable
+					isLoading={isLoading}
+					dispatchers={dispatchers ?? []}
+					onMultipleSelect={(e: Dispatcher[], optionSelect: string) =>
+						handleAction(optionSelect, e)
+					}
+					listDispatchersId={(e) => setSelectedIds(e)}
+					fetchNextPage={fetchNextPage}
+					hasNextPage={hasDefaultNextPage ? false : hasNextPage}
+					showMultipleSelect={btnMultiAction}
+				/>
 			</div>
 			<ModalForm isOpen={modal.isOpen} onOpenChange={modal.onOpenChange}>
 				<AddDispatcherForm

@@ -5,6 +5,7 @@ import {
 	DropdownItem,
 	DropdownMenu,
 	DropdownTrigger,
+	Selection,
 	Input,
 } from "@nextui-org/react";
 import React, { useEffect, useState } from "react";
@@ -15,6 +16,7 @@ import {
 	HiPencilAlt,
 } from "react-icons/hi";
 import { ReactSearchAutocomplete } from "react-search-autocomplete";
+import { DownIcon } from "../../public/downICon";
 
 interface HeaderDashboardProps {
 	title: string;
@@ -30,6 +32,7 @@ interface HeaderDashboardProps {
 	defaultSearch?: string;
 	onMultipleSelect: (optionSelect: string) => void;
 	searchBox?: React.ReactNode;
+	onSelectedFilter?: (value: Selection) => void;
 }
 export default function HeaderDashboard({
 	title,
@@ -42,8 +45,17 @@ export default function HeaderDashboard({
 	actionButtonText,
 	onMultipleSelect,
 	searchBox,
+	onSelectedFilter
 }: HeaderDashboardProps) {
 	const [selected, setSelected] = useState<DataSelectAutocomplete>();
+	const [statusOptions, setStatusOptions] = useState([{status: "Active", id: 1},{status: "Inactive", id: 2}]);
+	const [statusFilter, setStatusFilter] = useState<Selection>("all");
+
+	useEffect(() => {
+		if(onSelectedFilter !== undefined){
+			onSelectedFilter(statusFilter);
+		}
+	},[statusFilter])
 
 	return (
 		<div className="md:h-20 px-10 flex md:flex-row flex-col gap-8 md:gap-0 justify-between items-center">
@@ -80,6 +92,30 @@ export default function HeaderDashboard({
 					</Button>
 				)}
 				{searchBox && <div className="w-[250px] z-50">{searchBox}</div>}
+				<Dropdown>
+					<DropdownTrigger className="hidden sm:flex">
+						<Button
+						endContent={<DownIcon className="text-small" />}
+						color="primary"
+						>
+						Status
+						</Button>
+					</DropdownTrigger>
+					<DropdownMenu
+						disallowEmptySelection
+						aria-label="Table Columns"
+						closeOnSelect={false}
+						selectedKeys={statusFilter}
+						selectionMode="multiple"
+						onSelectionChange={setStatusFilter}
+					>
+						{statusOptions.map((status, index) => (
+						<DropdownItem key={status.id} className="capitalize">
+							{(status.status)}
+						</DropdownItem>
+						))}
+					</DropdownMenu>
+				</Dropdown>
 				{actionButtonText && (
 					<Button
 						onClick={() => addButtonRestriction?.()}

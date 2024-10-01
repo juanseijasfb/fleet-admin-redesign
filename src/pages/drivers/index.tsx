@@ -12,7 +12,7 @@ import UpdateDriverForm, {
 } from "@/components/forms/UpdateDriverForm";
 import type { ValuesFormAddRestriction } from "@/components/forms/AddRestrictionDriverForm";
 import AddRestrictionDriverForm from "@/components/forms/AddRestrictionDriverForm";
-import type { Driver, GetRestriccionResponseAPI } from "@/utils/types";
+import type { Driver, GetRestriccionResponseAPI, OptionSelect } from "@/utils/types";
 import {
 	useDisableDriver,
 	useEnableDriver,
@@ -59,6 +59,10 @@ export default function index() {
 	const [isDisable, setIsDisable] = useState<boolean>(false);
 	const [isEnable, setIsEnable] = useState<boolean>(false);
 	const [btnMultiAction, setBtnMultiAction] = useState<boolean>(false);
+	const [statusFilter, setStatusFilter] = useState<Selection>("all");
+	const [drivers, setDriverDriver] = useState<Driver[]>();
+	const [driversList, setDriverList] = useState<OptionSelect[]>();
+	const [hasDefaultNextPage, setHasDefaultNextPage] = useState<boolean>(false);
 	const { addRestriccion, addRPending } = useAddRestriccion(() => {
 		modalRestriction.onClose();
 		toast.success("Restriction added successfully");
@@ -153,11 +157,37 @@ export default function index() {
 		}
 	};
 
-	const drivers = driversInfinite?.pages.flatMap((page) => page.data) || [];
-	const driversList = drivers?.map((e) => ({
-		label: e.firstName?.replace(/,/g, " "),
-		value: e.firstName,
-	}));
+	useEffect(() => {
+		if (driversInfinite) {
+				const drivers = driversInfinite.pages.flatMap((page) => page.data) || [];
+				const driversList = drivers.map((e) => ({
+					label: e.firstName?.replace(/,/g, " "),
+					value: e.firstName,
+				}));
+				setDriverDriver(drivers);
+				setDriverList(driversList);
+		}
+		if(statusFilter !== undefined && driversAll !== undefined && driversInfinite !== undefined) {
+				const filtered = Array.from(statusFilter);
+				const hasBothStatuses = filtered.includes("1") && filtered.includes("2");
+				if (hasBothStatuses) {
+					setDriverDriver(driversInfinite.pages.flatMap((page) => page.data));
+					setHasDefaultNextPage(false);
+				} else {
+					filtered.forEach((item) => {
+						if (item === "1") {
+							setDriverDriver(driversAll.filter(d => d.status === "Active"));
+							setHasDefaultNextPage(true);
+						}
+						if (item === "2") {
+							setDriverDriver(driversAll.filter(d => d.status === "Inactive"));
+							setHasDefaultNextPage(true);
+						}
+					});
+				}
+				
+		}
+	}, [driversInfinite, statusFilter]);
 
 	return (
 		<LayoutDashboard>
@@ -215,6 +245,7 @@ export default function index() {
 						driversIds.includes(driver.id.toString()),
 					);
 				}}
+				onSelectedFilter={(e) => setStatusFilter(e)}
 			/>
 
 			<div className="px-10 max-w-[100%]">
@@ -226,7 +257,7 @@ export default function index() {
 					}
 					listDriversId={(e) => setSelectedIds(e)}
 					fetchNextPage={fetchNextPage}
-					hasNextPage={hasNextPage}
+					hasNextPage={hasDefaultNextPage ? false : hasNextPage}
 					showMultipleSelect={btnMultiAction}
 				/>
 			</div>
