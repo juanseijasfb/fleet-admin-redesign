@@ -15,8 +15,9 @@ export interface AddRestrictionDriverValues {
 	typeValue: string;
 	validUntil?: string;
 }
-export interface ValuesFormAddRestriction extends Omit<AddRestrictionDriverValues, 'subjectValue'> {
-    subjectValue: string[];
+export interface ValuesFormAddRestriction
+	extends Omit<AddRestrictionDriverValues, "subjectValue"> {
+	subjectValue: string[];
 }
 
 interface AddRestrictionDriverProps {
@@ -61,7 +62,9 @@ export default function AddRestrictionDriverForm({
 		validationSchema: restrictionDriveSchema,
 		onSubmit: onSubmit,
 	});
-	const [getCityList, setGetCityList] = useState<{ label: string; value: string }[]>([]);
+	const [getCityList, setGetCityList] = useState<
+		{ label: string; value: string }[]
+	>([]);
 
 	const { cities, isLoadingCities, isError } = useGetCities(values.state);
 
@@ -71,14 +74,22 @@ export default function AddRestrictionDriverForm({
 		}
 		setFieldValue("typeValue", "");
 	}, [values.state, isLoadingCities, isError, cities]);
-	
+
+	console.log(values);
+	console.log(errors);
+
 	return (
 		<div className="flex flex-col gap-8 py-4">
 			<h3 className="font-bold text-2xl pt-2">City and States Restrictions</h3>
 			<div>
 				<Selecting
 					options={driverList}
-					onChange={(e) => setFieldValue("subjectValue", e.map((e) => e.value))}
+					onChange={(e) =>
+						setFieldValue(
+							"subjectValue",
+							e.map((e) => e.value),
+						)
+					}
 					placeholder="Select Driver"
 					isMulti={true}
 				/>
@@ -105,7 +116,9 @@ export default function AddRestrictionDriverForm({
 					<Selecting
 						options={isLoadingCities ? [] : getCityList}
 						isOptionSelected={(e) => e.value === values.typeValue}
-						onChange={(e: any) => {setFieldValue("typeValue", e?.value), setFieldValue("type", "CI")}}
+						onChange={(e: any) => {
+							setFieldValue("typeValue", e?.value), setFieldValue("type", "CI");
+						}}
 						placeholder={
 							isLoadingCities
 								? "Loading cities..."

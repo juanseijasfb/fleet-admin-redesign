@@ -13,6 +13,8 @@ export type DriverResponseAPI = {
 	homeBaseState: string;
 	allowPickupHomeBase: 0 | 1;
 	fullName: string;
+	FirstName?: string;
+	LastName?: string;
 };
 export type DispatcherResponseAPI = {
 	dispatcherId: number;
@@ -40,6 +42,7 @@ export type Driver = {
 	weight: number;
 	mcNumber: number;
 	carrier: string;
+	fullName: string;
 };
 
 export type Dispatcher = {
@@ -91,12 +94,12 @@ export type GetRestriccionResponseAPI = {
 	SubjectValue: string;
 	TypeValue: string;
 	ValidUntil: string;
-}
+};
 export type OptionSelect = {
-  label: string;
-  value: string;
-}
+	label: string;
+	value: string;
+};
 export type DataSelectAutocomplete = {
 	id: number;
-    firstName: string;
-}
+	firstName: string;
+};

@@ -12,7 +12,11 @@ import UpdateDriverForm, {
 } from "@/components/forms/UpdateDriverForm";
 import type { ValuesFormAddRestriction } from "@/components/forms/AddRestrictionDriverForm";
 import AddRestrictionDriverForm from "@/components/forms/AddRestrictionDriverForm";
-import type { Driver, GetRestriccionResponseAPI, OptionSelect } from "@/utils/types";
+import type {
+	Driver,
+	GetRestriccionResponseAPI,
+	OptionSelect,
+} from "@/utils/types";
 import {
 	useDisableDriver,
 	useEnableDriver,
@@ -26,6 +30,7 @@ import { useGetRestriccionDriver } from "@/hooks/api/useGetRestriccionDriver";
 import ShowRestrictions from "@/components/forms/ShowRestriccions";
 import toast from "react-hot-toast";
 import { ReactSearchAutocomplete } from "react-search-autocomplete";
+import useUpdateDriver from "@/hooks/api/useUpdateDriver";
 
 export default function index() {
 	const { search, handleSearch, debounced } = useSearch("drivers");
@@ -133,7 +138,7 @@ export default function index() {
 		setBtnMultiAction(false);
 	}, [isDisable, isEnable]);
 
-	const handleSubmit = (e: any) => {
+	const handleSubmit = (e: ValuesFormAddRestriction) => {
 		if (e.subjectValue.length > 1) {
 			for (const i of e.subjectValue) {
 				addRestriccion({
@@ -145,7 +150,7 @@ export default function index() {
 					validUntil: e.validUntil,
 				});
 			}
-		} else if (e.subjectValue.length === 0) {
+		} else
 			addRestriccion({
 				subject: e.subject,
 				state: e.state,
@@ -154,40 +159,46 @@ export default function index() {
 				typeValue: e.typeValue,
 				validUntil: e.validUntil,
 			});
-		}
 	};
 
 	useEffect(() => {
 		if (driversInfinite) {
-				const drivers = driversInfinite.pages.flatMap((page) => page.data) || [];
-				const driversList = drivers.map((e) => ({
-					label: e.firstName?.replace(/,/g, " "),
-					value: e.firstName,
-				}));
-				setDriverDriver(drivers);
-				setDriverList(driversList);
+			const drivers = driversInfinite.pages.flatMap((page) => page.data) || [];
+			const driversList = drivers.map((e) => ({
+				label: e.fullName,
+				value: e.firstName,
+			}));
+			setDriverDriver(drivers);
+			setDriverList(driversList);
 		}
-		if(statusFilter !== undefined && driversAll !== undefined && driversInfinite !== undefined) {
-				const filtered = Array.from(statusFilter);
-				const hasBothStatuses = filtered.includes("1") && filtered.includes("2");
-				if (hasBothStatuses) {
-					setDriverDriver(driversInfinite.pages.flatMap((page) => page.data));
-					setHasDefaultNextPage(false);
-				} else {
-					filtered.forEach((item) => {
-						if (item === "1") {
-							setDriverDriver(driversAll.filter(d => d.status === "Active"));
-							setHasDefaultNextPage(true);
-						}
-						if (item === "2") {
-							setDriverDriver(driversAll.filter(d => d.status === "Inactive"));
-							setHasDefaultNextPage(true);
-						}
-					});
-				}
-				
+		if (
+			statusFilter !== undefined &&
+			driversAll !== undefined &&
+			driversInfinite !== undefined
+		) {
+			const filtered = Array.from(statusFilter);
+			const hasBothStatuses = filtered.includes("1") && filtered.includes("2");
+			if (hasBothStatuses) {
+				setDriverDriver(driversInfinite.pages.flatMap((page) => page.data));
+				setHasDefaultNextPage(false);
+			} else {
+				filtered.forEach((item) => {
+					if (item === "1") {
+						setDriverDriver(driversAll.filter((d) => d.status === "Active"));
+						setHasDefaultNextPage(true);
+					}
+					if (item === "2") {
+						setDriverDriver(driversAll.filter((d) => d.status === "Inactive"));
+						setHasDefaultNextPage(true);
+					}
+				});
+			}
 		}
 	}, [driversInfinite, statusFilter]);
+
+	const updateDriver = useUpdateDriver(() => {
+		toast.success("Driver updated successfully");
+	});
 
 	return (
 		<LayoutDashboard>
@@ -213,13 +224,13 @@ export default function index() {
 						items={driversAll || []}
 						resultStringKeyName="firstName"
 						onSelect={(e) => {
-							handleSearch(e.firstName);
+							handleSearch(e.fullName);
 						}}
 						formatResult={(item: Driver) =>
 							item && (
 								<div>
 									<div className="flex items-center gap-2">
-										<span className="text-sm ">{item.firstName}</span>
+										<span className="text-sm ">{item.fullName}</span>
 									</div>
 									<span className="text-xs text-gray-500">{item.email}</span>
 								</div>
@@ -277,9 +288,10 @@ export default function index() {
 			>
 				<UpdateDriverForm
 					defaultValues={selectedDriver}
-					isLoading={isPending}
-					onSubmit={(values) => {
-						console.log(values);
+					isLoading={updateDriver.isPending}
+					onSubmit={async (values) => {
+						await updateDriver.mutateAsync(values);
+						refetchDrivers();
 						modalUpdate.onClose();
 					}}
 					driverEmail={driversAll?.map((d) => d.email) ?? []}

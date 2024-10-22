@@ -8,15 +8,17 @@ import useGetCarriers from "@/hooks/api/useGetCarriers";
 import { Button, useDisclosure } from "@nextui-org/react";
 import React, { useState } from "react";
 import AddRestrictionCarrier, {
-	CarrierTableValues,
+	type CarrierTableValues,
 } from "@/components/forms/AddRestrictionCarrier";
 import useSearch from "@/hooks/useSearch";
 import { useGetBrokerList } from "@/hooks/api/useGetBroker";
 import toast from "react-hot-toast";
 import { useAddRestriccion } from "@/hooks/api/useChangeRestrictions";
 import ShowRestrictions from "@/components/forms/ShowRestriccions";
-import { Carrier, GetRestriccionResponseAPI } from "@/utils/types";
+import type { Carrier, GetRestriccionResponseAPI } from "@/utils/types";
 import { ReactSearchAutocomplete } from "react-search-autocomplete";
+import { useGetRestricctionBroker } from "@/hooks/api/useGetRestriccionsBroker";
+import ApiService from "@/services/ApiService";
 
 export default function index() {
 	const { listBroker, isLoadingBroker } = useGetBrokerList();
@@ -40,6 +42,12 @@ export default function index() {
 	const { createCarrier, isPending } = useCreateCarrier(() => {
 		modal.onClose();
 	});
+	const {
+		restriccionesCarrier,
+		isLoadingRestriccions,
+		refetchRestriccionsCarrier,
+	} = useGetRestricctionBroker(carrierSelected?.mcNumber);
+
 	const handlerModalRestriction = (e: any, optionSelect: string) => {
 		switch (optionSelect) {
 			case "add":
@@ -145,6 +153,14 @@ export default function index() {
 			>
 				<ShowRestrictions
 					onClose={modalShowRestrictions.onClose}
+					getLabel={(e) => {
+						return "";
+						// const api = new ApiService();
+						// const broker = await api.getBrokerByMcNumber({
+						// 	mcNumber: Number(e),
+						// });
+						// return broker.
+					}}
 					onSubmit={(e: GetRestriccionResponseAPI) =>
 						console.log({
 							subject: e.Subject,
@@ -153,8 +169,8 @@ export default function index() {
 							typeValue: e.TypeValue,
 						})
 					}
-					restriccionDriverList={[]}
-					nameDriver={(carrierSelected && carrierSelected?.carrier) || ""}
+					restriccionDriverList={restriccionesCarrier || []}
+					nameDriver={carrierSelected?.carrier || ""}
 				/>
 			</ModalForm>
 		</LayoutDashboard>

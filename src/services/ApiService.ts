@@ -10,10 +10,9 @@ import {
 	DriverStatus,
 	type BrokerResponseAPI,
 	type GetCitiesResponseAPI,
-	GetRestriccionResponseAPI,
+	type GetRestriccionResponseAPI,
 } from "@/utils/types";
 import axios from "axios";
-import path from "path";
 
 export default class ApiService {
 	// request = async (path: string, method: string, body?: RequestInit) => {
@@ -56,11 +55,12 @@ export default class ApiService {
 				path: `/getDriverInfo?${params.toString()}`,
 				method: "GET",
 			});
+			console.log(driversResponse);
 			return [
 				{
 					id: driversResponse.driverId,
-					firstName: driversResponse.fullName,
-					lastName: driversResponse.fullName,
+					firstName: driversResponse.FirstName || "",
+					lastName: driversResponse.LastName || "",
 					email: driversResponse.email,
 					carrier: driversResponse.Carrier,
 					mcNumber: driversResponse.MCNumber,
@@ -69,6 +69,7 @@ export default class ApiService {
 						? DriverStatus.Active
 						: DriverStatus.Inactive,
 					weight: driversResponse.maxWeight,
+					fullName: `${driversResponse.LastName}, ${driversResponse.FirstName}`,
 				},
 			];
 		}
@@ -80,14 +81,15 @@ export default class ApiService {
 
 		const drivers: Driver[] = driversResponse.map((driver) => ({
 			id: driver.driverId,
-			firstName: driver.fullName,
-			lastName: driver.fullName,
+			firstName: driver.fullName.split(",")[1],
+			lastName: driver.fullName.split(",")[0],
 			email: driver.email,
 			carrier: driver.Carrier,
 			mcNumber: driver.MCNumber,
 			equipment: driver.Equipment,
 			status: driver.enabled ? DriverStatus.Active : DriverStatus.Inactive,
 			weight: driver.maxWeight,
+			fullName: driver.fullName,
 		}));
 
 		return drivers;
@@ -285,14 +287,18 @@ export default class ApiService {
 		params.append("email", updateDriverBody.email);
 		params.append("mcNumber", updateDriverBody.mcNumber);
 		params.append("carrier", updateDriverBody.carrier);
-		params.append("weight", updateDriverBody.maxWeight);
-		params.append("equipment", updateDriverBody.equipment);
+		params.append("maxWeight", updateDriverBody.maxWeight);
+		params.append("trailerType", updateDriverBody.equipment);
 		try {
-			await new Promise((resolve) => setTimeout(resolve, 1000));
-			const response = {
-				mensaje: "Driver actualizado exitosamente",
-			};
-			console.log(response);
+			const response = await this.request<any[]>({
+				path: "/changeDriver",
+				method: "POST",
+				headers: {
+					"Content-Type": "application/x-www-form-urlencoded",
+				},
+				body: params,
+			});
+
 			return response;
 		} catch (error) {
 			console.error("Error:", error);
@@ -302,6 +308,13 @@ export default class ApiService {
 	async getBrokerList() {
 		const brokers = await this.request<BrokerResponseAPI[]>({
 			path: "/getBrokerList?MCNumbers=131,76,138,7,1",
+			method: "GET",
+		});
+		return brokers;
+	}
+	async getBrokerByMcNumber({ mcNumber }: { mcNumber: number }) {
+		const brokers = await this.request<BrokerResponseAPI>({
+			path: `/getBroker?MCNumber=${mcNumber}`,
 			method: "GET",
 		});
 		return brokers;
@@ -470,6 +483,20 @@ export default class ApiService {
 			const params = new URLSearchParams();
 			if (search) {
 				params.append("driver", search);
+			}
+
+			const getRestriccion = await this.request<GetRestriccionResponseAPI[]>({
+				path: `/getRestrictions?${params.toString()}`,
+				method: "GET",
+			});
+			return getRestriccion;
+		}
+	}
+	async getRestriccionCarrier({ search }: { search?: string }) {
+		{
+			const params = new URLSearchParams();
+			if (search) {
+				params.append("carrier", search);
 			}
 
 			const getRestriccion = await this.request<GetRestriccionResponseAPI[]>({
